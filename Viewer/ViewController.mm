@@ -168,6 +168,8 @@ struct AppStatus
     
     float measureCoords[4]; // [x1, y1, x2, y2]
     uint measurePtCursor;
+    int depthFrameWidth;
+    int depthFrameHeight;
     
     UIImageView *_selectionView; // show selected points for measurements
     int halfSquare;
@@ -213,8 +215,8 @@ struct AppStatus
     
 //    [self setupColorCamera];
 
-    measureCoords[0] = 1;
-    measureCoords[1] = 1;
+    measureCoords[0] = 0;
+    measureCoords[1] = 0;
     measureCoords[2] = depthFrame.size.width-1;
     measureCoords[3] = depthFrame.size.height-1;
     measurePtCursor = 0;
@@ -528,6 +530,10 @@ struct AppStatus
 
 - (void)sensorDidOutputDepthFrame:(STDepthFrame *)depthFrame
 {
+    if (depthFrameWidth == 0 || depthFrameHeight == 0){
+        depthFrameWidth = depthFrame.width;
+        depthFrameHeight = depthFrame.height;
+    }
     [self renderDepthFrame:depthFrame];
 //    [self renderNormalsFrame:depthFrame];
 }
@@ -980,8 +986,10 @@ const uint16_t maxShiftValue = 2048;
 
 - (void) updateNextPoint: (CGPoint) p {
     // Update the measurement point specified by cursor with given CGPoint and update cursor.
-    measureCoords[measurePtCursor*2] = p.x;
-    measureCoords[measurePtCursor*2+1] = p.y;
+    
+    // normalize to depth frame resolution
+    measureCoords[measurePtCursor*2] = p.x * (depthFrameWidth / self.view.frame.size.width);
+    measureCoords[measurePtCursor*2+1] = p.y * (depthFrameHeight / self.view.frame.size.height);
     
     measurePtCursor = (measurePtCursor + 1) % 2;
 }

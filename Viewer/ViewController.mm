@@ -166,8 +166,11 @@ struct AppStatus
     
     AppStatus _appStatus;
     
-    double measureCoords[4]; // [x1, y1, x2, y2]
+    float measureCoords[4]; // [x1, y1, x2, y2]
+    uint measurePtCursor;
     
+    UIImageView *_selectionView; // show selected points for measurements
+    int halfSquare;
     UITextView *coordView_; // For deubgging
 
 }
@@ -196,20 +199,8 @@ struct AppStatus
     // Create three image views where we will render our frames
     
     CGRect depthFrame = self.view.frame;
-//    depthFrame.size.height /= 2;
-//    depthFrame.origin.y = self.view.frame.size.height/2;
     depthFrame.origin.y = 1;
     depthFrame.origin.x = 1;
-//    depthFrame.origin.x = -self.view.frame.size.width * 0.25;
-    
-//    CGRect normalsFrame = self.view.frame;
-//    normalsFrame.size.height /= 2;
-//    normalsFrame.origin.y = self.view.frame.size.height/2;
-//    normalsFrame.origin.x = 1;
-//    normalsFrame.origin.x = self.view.frame.size.width * 0.25;
-//    
-//    CGRect colorFrame = self.view.frame;
-//    colorFrame.size.height /= 2;
     
     _linearizeBuffer = NULL;
 //    _coloredDepthBuffer = NULL;
@@ -220,27 +211,26 @@ struct AppStatus
     _depthImageView.contentMode = UIViewContentModeScaleAspectFit;
     [self.view addSubview:_depthImageView];
     
-//    _normalsImageView = [[UIImageView alloc] initWithFrame:normalsFrame];
-//    _normalsImageView.contentMode = UIViewContentModeScaleAspectFit;
-//    [self.view addSubview:_normalsImageView];
-//    
-//    _colorImageView = [[UIImageView alloc] initWithFrame:colorFrame];
-//    _colorImageView.contentMode = UIViewContentModeScaleAspectFit;
-//    [self.view addSubview:_colorImageView];
-
 //    [self setupColorCamera];
+
     measureCoords[0] = 1;
     measureCoords[1] = 1;
     measureCoords[2] = depthFrame.size.width-1;
     measureCoords[3] = depthFrame.size.height-1;
+    measurePtCursor = 0;
     
     std::cout << "measureCoords: (" << measureCoords[0] << "," << measureCoords[1] << ") to ("
     << measureCoords[2] << "," << measureCoords[3] << ")" << std::endl;
+    
+    _selectionView = [[UIImageView alloc] initWithFrame:depthFrame];
+    [_selectionView setOpaque:false];
+    [self.view addSubview:_selectionView];
+    halfSquare = 25;
 
     coordView_ = [[UITextView alloc] initWithFrame:CGRectMake(0,15,self.view.frame.size.width,35)];
-    [coordView_ setOpaque:false]; // Set to be Opaque
+    [coordView_ setOpaque:false];
     [coordView_ setBackgroundColor:[UIColor clearColor]]; // Set background color to be clear
-    [coordView_ setTextColor:[UIColor redColor]]; // Set text to be RED
+    [coordView_ setTextColor:[UIColor lightGrayColor]]; // Set text to be RED
     [coordView_ setFont:[UIFont systemFontOfSize:18]]; // Set the Font size
     [self.view addSubview:coordView_];
     [self.view bringSubviewToFront:coordView_] ;
@@ -987,6 +977,14 @@ const uint16_t maxShiftValue = 2048;
     [_sensorController frameSyncNewColorBuffer:sampleBuffer];
 }
 
+- (void) updateNextPoint: (CGPoint) p {
+    // Update the measurement point specified by cursor with given CGPoint and update cursor.
+    measureCoords[measurePtCursor*2] = p.x;
+    measureCoords[measurePtCursor*2+1] = p.y;
+    
+    measurePtCursor = (measurePtCursor + 1) % 2;
+}
+
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
@@ -994,7 +992,16 @@ const uint16_t maxShiftValue = 2048;
     NSString *coord_NSStr = [NSString stringWithFormat:@"touches began (%2.2f, %2.2f)",
                              currentPoint.x, currentPoint.y];
     coordView_.text = coord_NSStr;
-    // TODO Yi: draw square around current selections
+    
+    // Yi: draw square around current selections
+    UIGraphicsBeginImageContextWithOptions(_selectionView.frame.size, false, 1.0f);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGRect selectedRect = CGRectMake(currentPoint.x - halfSquare, currentPoint.y - halfSquare,
+                                     halfSquare*2, halfSquare*2);
+    CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+    CGContextStrokeRect(context, selectedRect);
+    _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
 }
 
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -1004,54 +1011,39 @@ const uint16_t maxShiftValue = 2048;
     NSString *coord_NSStr = [NSString stringWithFormat:@"touches moved (%2.2f, %2.2f)",
                              currentPoint.x, currentPoint.y];
     coordView_.text = coord_NSStr;
-    // TODO Yi: draw square around current selections
     
-//    UIGraphicsBeginImageContext(self.view.frame.size);
-//    [self.tempDrawImage.image drawInRect:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
-//    CGContextMoveToPoint(UIGraphicsGetCurrentContext(), lastPoint.x, lastPoint.y);
-//    CGContextAddLineToPoint(UIGraphicsGetCurrentContext(), currentPoint.x, currentPoint.y);
-//    CGContextSetLineCap(UIGraphicsGetCurrentContext(), kCGLineCapRound);
-//    CGContextSetLineWidth(UIGraphicsGetCurrentContext(), brush);
-//    CGContextSetRGBStrokeColor(UIGraphicsGetCurrentContext(), red, green, blue, 1.0);
-//    CGContextSetBlendMode(UIGraphicsGetCurrentContext(), kCGBlendModeNormal);
-//    
-//    CGContextStrokePath(UIGraphicsGetCurrentContext());
-//    self.tempDrawImage.image = UIGraphicsGetImageFromCurrentImageContext();
-//    [self.tempDrawImage setAlpha:opacity];
-//    UIGraphicsEndImageContext();
+    // Draw square around current selections
+    UIGraphicsBeginImageContextWithOptions(_selectionView.frame.size, false, 1.0f);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGRect selectedRect = CGRectMake(currentPoint.x - halfSquare, currentPoint.y - halfSquare,
+                                    halfSquare*2, halfSquare*2);
+    CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+    CGContextStrokeRect(context, selectedRect);
+    _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
 }
 
 - (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
-    std::cout << "touches ended " << currentPoint.x << ", " << currentPoint.y << std::endl;
-    NSString *coord_NSStr = [NSString stringWithFormat:@"touches ended (%2.2f, %2.2f)",
-                             currentPoint.x, currentPoint.y];
-    coordView_.text = coord_NSStr;
-    // TODO Yi: Alternatively update selected points
-
-//    if (!mouseSwiped) {
-//        UIGraphicsBeginImageContext(self.view.frame.size);
-//        [self.tempDrawImage.image drawInRect:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
-//        CGContextSetLineCap(UIGraphicsGetCurrentContext(), kCGLineCapRound);
-//        CGContextSetLineWidth(UIGraphicsGetCurrentContext(), brush);
-//        CGContextSetRGBStrokeColor(UIGraphicsGetCurrentContext(), red, green, blue, opacity);
-//        CGContextMoveToPoint(UIGraphicsGetCurrentContext(), lastPoint.x, lastPoint.y);
-//        CGContextAddLineToPoint(UIGraphicsGetCurrentContext(), lastPoint.x, lastPoint.y);
-//        CGContextStrokePath(UIGraphicsGetCurrentContext());
-//        CGContextFlush(UIGraphicsGetCurrentContext());
-//        self.tempDrawImage.image = UIGraphicsGetImageFromCurrentImageContext();
-//        UIGraphicsEndImageContext();
-//    }
-//    
-//    UIGraphicsBeginImageContext(self.mainImage.frame.size);
-//    [self.mainImage.image drawInRect:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) blendMode:kCGBlendModeNormal alpha:1.0];
-//    [self.tempDrawImage.image drawInRect:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) blendMode:kCGBlendModeNormal alpha:opacity];
-//    self.mainImage.image = UIGraphicsGetImageFromCurrentImageContext();
-//    self.tempDrawImage.image = nil;
-//    UIGraphicsEndImageContext();
-//    NSLog(@"height: %f", self.view.frame.size.height);
     
+    // Alternatively update selected points
+    [self updateNextPoint:currentPoint];
+    std::cout << "touches ended (" << measureCoords[0] << ", " << measureCoords[1] << ") to ("
+                << measureCoords[2] << "," << measureCoords[3] << ")" << std::endl;
+    NSString *coord_NSStr = [NSString stringWithFormat:@"measuring from (%2.2f, %2.2f) to (%2.2f, %2.2f)",
+                             measureCoords[0], measureCoords[1], measureCoords[2], measureCoords[3]];
+    coordView_.text = coord_NSStr;
+    
+    // Draw square around current selections
+    UIGraphicsBeginImageContextWithOptions(_selectionView.frame.size, false, 1.0f);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGRect selectedRect = CGRectMake(currentPoint.x - halfSquare, currentPoint.y - halfSquare,
+                                     halfSquare*2, halfSquare*2);
+    CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+    CGContextStrokeRect(context, selectedRect);
+    _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
 }
 
 

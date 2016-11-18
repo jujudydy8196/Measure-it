@@ -307,11 +307,16 @@ struct AppStatus
 
 - (BOOL)connectAndStartStreaming
 {
+    std::cout << "connectAndStartStreaming" << std::endl;
     STSensorControllerInitStatus result = [_sensorController initializeSensorConnection];
+
+    std::cout << "connectAndStartStreaming result" << result << std::endl;
     
     BOOL didSucceed =
         result == STSensorControllerInitStatusSuccess
      || result == STSensorControllerInitStatusAlreadyInitialized;
+    
+    std::cout << "connectAndStartStreaming didSucceed " << didSucceed << std::endl;
 
     if (didSucceed)
     {
@@ -532,7 +537,7 @@ struct AppStatus
 - (void)sensorDidOutputDepthFrame:(STDepthFrame *)depthFrame
 {
     [self renderDepthFrame:depthFrame];
-    [self renderNormalsFrame:depthFrame];
+//    [self renderNormalsFrame:depthFrame];
 }
 
 // This synchronized API will only be called when two frames match.
@@ -544,8 +549,8 @@ struct AppStatus
                                    colorFrame:(STColorFrame *)colorFrame
 {
     [self renderDepthFrame:depthFrame];
-    [self renderNormalsFrame:depthFrame];
-    [self renderColorFrame:colorFrame.sampleBuffer];
+//    [self renderNormalsFrame:depthFrame];
+//    [self renderColorFrame:colorFrame.sampleBuffer];
 }
 
 //------------------------------------------------------------------------------

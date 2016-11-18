@@ -192,14 +192,6 @@ struct AppStatus
     _sensorController = [STSensorController sharedController];
     _sensorController.delegate = self;
     
-        coordView_ = [[UITextView alloc] initWithFrame:CGRectMake(0,15,self.view.frame.size.width,35)];
-        [coordView_ setOpaque:false]; // Set to be Opaque
-        [coordView_ setBackgroundColor:[UIColor clearColor]]; // Set background color to be clear
-        [coordView_ setTextColor:[UIColor redColor]]; // Set text to be RED
-        [coordView_ setFont:[UIFont systemFontOfSize:18]]; // Set the Font size
-        [self.view addSubview:coordView_];
-
-
     // Create three image views where we will render our frames
     
     CGRect depthFrame = self.view.frame;
@@ -243,7 +235,15 @@ struct AppStatus
     
     std::cout << "measureCoords: (" << measureCoords[0] << "," << measureCoords[1] << ") to ("
     << measureCoords[2] << "," << measureCoords[3] << ")" << std::endl;
-    
+
+    coordView_ = [[UITextView alloc] initWithFrame:CGRectMake(0,15,self.view.frame.size.width,35)];
+    [coordView_ setOpaque:false]; // Set to be Opaque
+    [coordView_ setBackgroundColor:[UIColor clearColor]]; // Set background color to be clear
+    [coordView_ setTextColor:[UIColor redColor]]; // Set text to be RED
+    [coordView_ setFont:[UIFont systemFontOfSize:18]]; // Set the Font size
+    [self.view addSubview:coordView_];
+    [self.view bringSubviewToFront:coordView_] ;
+
 }
 
 - (void)dealloc

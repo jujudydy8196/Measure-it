@@ -654,7 +654,8 @@ const uint16_t maxShiftValue = 2048;
     
     [self convertShiftToRGBA:depthFrame.shiftData depthValuesCount:cols * rows];
 //    [self distance:depthFrame.shiftData depthValuesCount:cols * rows];
-
+    [self distance:depthFrame];
+    
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
     CGBitmapInfo bitmapInfo;
@@ -1054,20 +1055,28 @@ const uint16_t maxShiftValue = 2048;
 //    NSLog(@"height: %f", self.view.frame.size.height);
     
 }
-- (void) distance:(const uint16_t*)shiftValues depthValuesCount:(size_t)depthValuesCount{
+- (void) distance:(STDepthFrame *)depthFrame{//:(const uint16_t*)shiftValues depthValuesCount:(size_t)depthValuesCount{
 //    measureCoords[0]=2;
 //    measureCoords[1]=10;
 //    measureCoords[2]=2;
 //    measureCoords[3]=20;
     
-    uint16_t lefttop = std::min (shiftValues[0], maxShiftValue);
-    // Use a lookup table to make the non-linear input values vary more linearly with metric depth
-    int leftTop_linearizedDepth = _linearizeBuffer[lefttop];
+//    arma::fmat K;
+//    K << 3043.72 <<       0 << 1196 << arma::endr
+//    <<       0 << 3043.72 << 1604 << arma::endr
+//    <<       0 <<    0    <<    1;
+//
     
-    uint16_t rightbot = std::min (shiftValues[100], maxShiftValue);
-    // Use a lookup table to make the non-linear input values vary more linearly with metric depth
-    int rightBot_linearizedDepth = _linearizeBuffer[rightbot];
-    std::cout << "leftTop : " << leftTop_linearizedDepth << " rightBot: " << rightBot_linearizedDepth << std::endl;
+    NSLog(@"Central shift: %d depth: %f", depthFrame.shiftData[160*340+120], depthFrame.depthInMillimeters[160*340+120]); NSLog(@"Central shift: %d depth: %f", depthFrame.shiftData[160*340+120], depthFrame.depthInMillimeters[160*340+120]);
+    
+//    uint16_t lefttop = std::min (shiftValues[0], maxShiftValue);
+//    // Use a lookup table to make the non-linear input values vary more linearly with metric depth
+//    int leftTop_linearizedDepth = _linearizeBuffer[lefttop];
+//    
+//    uint16_t rightbot = std::min (shiftValues[100], maxShiftValue);
+//    // Use a lookup table to make the non-linear input values vary more linearly with metric depth
+//    int rightBot_linearizedDepth = _linearizeBuffer[rightbot];
+//    std::cout << "leftTop : " << leftTop_linearizedDepth << " rightBot: " << rightBot_linearizedDepth << std::endl;
 }
 
 @end

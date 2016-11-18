@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6F7C0CBC17F0EA0500692EC1"
-               BuildableName = "Viewer.app"
+               BuildableName = "MeasureIt.app"
                BlueprintName = "MeasureIt"
                ReferencedContainer = "container:MeasureIt.xcodeproj">
             </BuildableReference>
@@ -33,7 +33,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6F7C0CBC17F0EA0500692EC1"
-            BuildableName = "Viewer.app"
+            BuildableName = "MeasureIt.app"
             BlueprintName = "MeasureIt"
             ReferencedContainer = "container:MeasureIt.xcodeproj">
          </BuildableReference>
@@ -56,7 +56,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6F7C0CBC17F0EA0500692EC1"
-            BuildableName = "Viewer.app"
+            BuildableName = "MeasureIt.app"
             BlueprintName = "MeasureIt"
             ReferencedContainer = "container:MeasureIt.xcodeproj">
          </BuildableReference>
@@ -75,7 +75,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6F7C0CBC17F0EA0500692EC1"
-            BuildableName = "Viewer.app"
+            BuildableName = "MeasureIt.app"
             BlueprintName = "MeasureIt"
             ReferencedContainer = "container:MeasureIt.xcodeproj">
          </BuildableReference>

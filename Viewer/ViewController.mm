@@ -9,6 +9,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <Accelerate/Accelerate.h>
 #import <algorithm>
+#include <iostream>
 
 //------------------------------------------------------------------------------
 
@@ -150,19 +151,21 @@ struct AppStatus
     AVCaptureDevice *_videoDevice;
 
     UIImageView *_depthImageView;
-    UIImageView *_normalsImageView;
-    UIImageView *_colorImageView;
+//    UIImageView *_normalsImageView;
+//    UIImageView *_colorImageView;
     
     uint16_t *_linearizeBuffer;
     uint8_t *_coloredDepthBuffer;
-    uint8_t *_normalsBuffer;
-    uint8_t *_colorImageBuffer;
+//    uint8_t *_normalsBuffer;
+//    uint8_t *_colorImageBuffer;
 
-    STNormalEstimator *_normalsEstimator;
+//    STNormalEstimator *_normalsEstimator;
     
     UILabel* _statusLabel;
     
     AppStatus _appStatus;
+    
+    double measureCoords[4]; // [x1, y1, x2, y2]
 }
 
 - (BOOL)connectAndStartStreaming;
@@ -204,7 +207,7 @@ struct AppStatus
 //    CGRect colorFrame = self.view.frame;
 //    colorFrame.size.height /= 2;
     
-//    _linearizeBuffer = NULL;
+    _linearizeBuffer = NULL;
 //    _coloredDepthBuffer = NULL;
 //    _normalsBuffer = NULL;
 //    _colorImageBuffer = NULL;
@@ -222,14 +225,22 @@ struct AppStatus
 //    [self.view addSubview:_colorImageView];
 
 //    [self setupColorCamera];
+    measureCoords[0] = 1;
+    measureCoords[1] = 1;
+    measureCoords[2] = depthFrame.size.width-1;
+    measureCoords[3] = depthFrame.size.height-1;
+    
+    std::cout << "measureCoords: (" << measureCoords[0] << "," << measureCoords[1] << ") to ("
+    << measureCoords[2] << "," << measureCoords[3] << ")" << std::endl;
+    
 }
 
 - (void)dealloc
 {
-    free(_linearizeBuffer);
-    free(_coloredDepthBuffer);
-    free(_normalsBuffer);
-    free(_colorImageBuffer);
+//    free(_linearizeBuffer);
+//    free(_coloredDepthBuffer);
+//    free(_normalsBuffer);
+//    free(_colorImageBuffer);
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -326,8 +337,7 @@ struct AppStatus
         }
         
         // Allocate the depth to surface normals converter class.
-
-        _normalsEstimator = [[STNormalEstimator alloc] init];
+//        _normalsEstimator = [[STNormalEstimator alloc] init];
     }
     else
     {
@@ -612,7 +622,7 @@ const uint16_t maxShiftValue = 2048;
     size_t cols = depthFrame.width;
     size_t rows = depthFrame.height;
     
-    if (_linearizeBuffer == NULL || _normalsBuffer == NULL)
+    if (_linearizeBuffer == NULL) //|| _normalsBuffer == NULL)
     {
         [self populateLinearizeBuffer];
         _coloredDepthBuffer = (uint8_t*)malloc(cols * rows * 4);
@@ -650,124 +660,124 @@ const uint16_t maxShiftValue = 2048;
     
 }
 
-- (void) renderNormalsFrame: (STDepthFrame*) depthFrame
-{
-    // Estimate surface normal direction from depth float values
-    STNormalFrame *normalsFrame = [_normalsEstimator calculateNormalsWithDepthFrame:depthFrame];
-    
-    size_t cols = normalsFrame.width;
-    size_t rows = normalsFrame.height;
-    
-    // Convert normal unit vectors (ranging from -1 to 1) to RGB (ranging from 0 to 255)
-    // Z can be slightly positive in some cases too!
-    if (_normalsBuffer == NULL)
-    {
-        _normalsBuffer = (uint8_t*)malloc(cols * rows * 4);
-    }
-    for (size_t i = 0; i < cols * rows; i++)
-    {
-        _normalsBuffer[4*i+0] = (uint8_t)( ( ( normalsFrame.normals[i].x / 2 ) + 0.5 ) * 255);
-        _normalsBuffer[4*i+1] = (uint8_t)( ( ( normalsFrame.normals[i].y / 2 ) + 0.5 ) * 255);
-        _normalsBuffer[4*i+2] = (uint8_t)( ( ( normalsFrame.normals[i].z / 2 ) + 0.5 ) * 255);
-    }
-    
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    CGBitmapInfo bitmapInfo;
-    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipFirst;
-    bitmapInfo |= kCGBitmapByteOrder32Little;
-    
-    NSData *data = [NSData dataWithBytes:_normalsBuffer length:cols * rows * 4];
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
-    
-    CGImageRef imageRef = CGImageCreate(cols,
-                                        rows,
-                                        8,
-                                        8 * 4,
-                                        cols * 4,
-                                        colorSpace,
-                                        bitmapInfo,
-                                        provider,
-                                        NULL,
-                                        false,
-                                        kCGRenderingIntentDefault);
-    
-    _normalsImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
-    
-    CGImageRelease(imageRef);
-    CGDataProviderRelease(provider);
-    CGColorSpaceRelease(colorSpace);
-}
+//- (void) renderNormalsFrame: (STDepthFrame*) depthFrame
+//{
+//    // Estimate surface normal direction from depth float values
+//    STNormalFrame *normalsFrame = [_normalsEstimator calculateNormalsWithDepthFrame:depthFrame];
+//    
+//    size_t cols = normalsFrame.width;
+//    size_t rows = normalsFrame.height;
+//    
+//    // Convert normal unit vectors (ranging from -1 to 1) to RGB (ranging from 0 to 255)
+//    // Z can be slightly positive in some cases too!
+//    if (_normalsBuffer == NULL)
+//    {
+//        _normalsBuffer = (uint8_t*)malloc(cols * rows * 4);
+//    }
+//    for (size_t i = 0; i < cols * rows; i++)
+//    {
+//        _normalsBuffer[4*i+0] = (uint8_t)( ( ( normalsFrame.normals[i].x / 2 ) + 0.5 ) * 255);
+//        _normalsBuffer[4*i+1] = (uint8_t)( ( ( normalsFrame.normals[i].y / 2 ) + 0.5 ) * 255);
+//        _normalsBuffer[4*i+2] = (uint8_t)( ( ( normalsFrame.normals[i].z / 2 ) + 0.5 ) * 255);
+//    }
+//    
+//    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+//    
+//    CGBitmapInfo bitmapInfo;
+//    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipFirst;
+//    bitmapInfo |= kCGBitmapByteOrder32Little;
+//    
+//    NSData *data = [NSData dataWithBytes:_normalsBuffer length:cols * rows * 4];
+//    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
+//    
+//    CGImageRef imageRef = CGImageCreate(cols,
+//                                        rows,
+//                                        8,
+//                                        8 * 4,
+//                                        cols * 4,
+//                                        colorSpace,
+//                                        bitmapInfo,
+//                                        provider,
+//                                        NULL,
+//                                        false,
+//                                        kCGRenderingIntentDefault);
+//    
+//    _normalsImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
+//    
+//    CGImageRelease(imageRef);
+//    CGDataProviderRelease(provider);
+//    CGColorSpaceRelease(colorSpace);
+//}
 
-- (void)renderColorFrame:(CMSampleBufferRef)yCbCrSampleBuffer
-{
-    
-    CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(yCbCrSampleBuffer);
-    
-    // get image size
-    size_t cols = CVPixelBufferGetWidth(pixelBuffer);
-    size_t rows = CVPixelBufferGetHeight(pixelBuffer);
-    
-    // allocate memory for RGBA image for the first time
-    if(_colorImageBuffer==NULL)
-        _colorImageBuffer = (uint8_t*)malloc(cols * rows * 4);
-    
-    // color space
-    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-    
-    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-    
-    // get y plane
-    const uint8_t* yData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
-    
-    // get cbCr plane
-    const uint8_t* cbCrData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
-    
-    size_t yBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
-    size_t cbcrBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
-    assert( yBytePerRow==cbcrBytePerRow );
-
-    uint8_t* bgra = _colorImageBuffer;
-    
-    bool ok = convertYCbCrToBGRA(cols, rows, yData, cbCrData, bgra, 0xff, yBytePerRow, cbcrBytePerRow, 4 * cols);
-
-    if (!ok)
-    {
-        NSLog(@"YCbCr to BGRA conversion failed.");
-        return;
-    }
-
-    NSData *data = [[NSData alloc] initWithBytes:_colorImageBuffer length:rows*cols*4];
-    
-    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-    
-    CGBitmapInfo bitmapInfo;
-    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipFirst;
-    bitmapInfo |= kCGBitmapByteOrder32Little;
-    
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
-    
-    CGImageRef imageRef = CGImageCreate(
-        cols,
-        rows,
-        8,
-        8 * 4,
-        cols*4,
-        colorSpace,
-        bitmapInfo,
-        provider,
-        NULL,
-        false,
-        kCGRenderingIntentDefault
-    );
-    
-    _colorImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
-    
-    CGImageRelease(imageRef);
-    CGDataProviderRelease(provider);
-    CGColorSpaceRelease(colorSpace);
-}
-
+//- (void)renderColorFrame:(CMSampleBufferRef)yCbCrSampleBuffer
+//{
+//    
+//    CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(yCbCrSampleBuffer);
+//    
+//    // get image size
+//    size_t cols = CVPixelBufferGetWidth(pixelBuffer);
+//    size_t rows = CVPixelBufferGetHeight(pixelBuffer);
+//    
+//    // allocate memory for RGBA image for the first time
+//    if(_colorImageBuffer==NULL)
+//        _colorImageBuffer = (uint8_t*)malloc(cols * rows * 4);
+//    
+//    // color space
+//    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+//    
+//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+//    
+//    // get y plane
+//    const uint8_t* yData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+//    
+//    // get cbCr plane
+//    const uint8_t* cbCrData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+//    
+//    size_t yBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+//    size_t cbcrBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+//    assert( yBytePerRow==cbcrBytePerRow );
+//
+//    uint8_t* bgra = _colorImageBuffer;
+//    
+//    bool ok = convertYCbCrToBGRA(cols, rows, yData, cbCrData, bgra, 0xff, yBytePerRow, cbcrBytePerRow, 4 * cols);
+//
+//    if (!ok)
+//    {
+//        NSLog(@"YCbCr to BGRA conversion failed.");
+//        return;
+//    }
+//
+//    NSData *data = [[NSData alloc] initWithBytes:_colorImageBuffer length:rows*cols*4];
+//    
+//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+//    
+//    CGBitmapInfo bitmapInfo;
+//    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipFirst;
+//    bitmapInfo |= kCGBitmapByteOrder32Little;
+//    
+//    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
+//    
+//    CGImageRef imageRef = CGImageCreate(
+//        cols,
+//        rows,
+//        8,
+//        8 * 4,
+//        cols*4,
+//        colorSpace,
+//        bitmapInfo,
+//        provider,
+//        NULL,
+//        false,
+//        kCGRenderingIntentDefault
+//    );
+//    
+//    _colorImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
+//    
+//    CGImageRelease(imageRef);
+//    CGDataProviderRelease(provider);
+//    CGColorSpaceRelease(colorSpace);
+//}
+//
 //------------------------------------------------------------------------------
 
 #pragma mark -  AVFoundation

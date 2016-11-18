@@ -571,7 +571,8 @@ const uint16_t maxShiftValue = 2048;
 - (void)convertShiftToRGBA:(const uint16_t*)shiftValues depthValuesCount:(size_t)depthValuesCount
 {
     
-    std::cout << depthValuesCount << std::endl;
+//    std::cout << depthValuesCount << std::endl;
+    
     for (size_t i = 0; i < depthValuesCount; i++)
     {
         
@@ -579,7 +580,6 @@ const uint16_t maxShiftValue = 2048;
         uint16_t boundedShift = std::min (shiftValues[i], maxShiftValue);
         // Use a lookup table to make the non-linear input values vary more linearly with metric depth
         int linearizedDepth = _linearizeBuffer[boundedShift];
-        std::cout << linearizedDepth << std::endl;
 
         // Use the upper byte of the linearized shift value to choose a base color
         // Base colors range from: (closest) White, Red, Orange, Yellow, Green, Cyan, Blue, Black (farthest)
@@ -634,6 +634,7 @@ const uint16_t maxShiftValue = 2048;
 {
     size_t cols = depthFrame.width;
     size_t rows = depthFrame.height;
+//    std::cout << "cols : " << cols << " rows: " << rows << std::endl;
     
     if (_linearizeBuffer == NULL) //|| _normalsBuffer == NULL)
     {
@@ -642,8 +643,8 @@ const uint16_t maxShiftValue = 2048;
     }
     
     [self convertShiftToRGBA:depthFrame.shiftData depthValuesCount:cols * rows];
-    
-    
+//    [self distance:depthFrame.shiftData depthValuesCount:cols * rows];
+
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
     CGBitmapInfo bitmapInfo;
@@ -1045,6 +1046,20 @@ const uint16_t maxShiftValue = 2048;
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
 }
-
+- (void) distance:(const uint16_t*)shiftValues depthValuesCount:(size_t)depthValuesCount{
+//    measureCoords[0]=2;
+//    measureCoords[1]=10;
+//    measureCoords[2]=2;
+//    measureCoords[3]=20;
+    
+    uint16_t lefttop = std::min (shiftValues[0], maxShiftValue);
+    // Use a lookup table to make the non-linear input values vary more linearly with metric depth
+    int leftTop_linearizedDepth = _linearizeBuffer[lefttop];
+    
+    uint16_t rightbot = std::min (shiftValues[100], maxShiftValue);
+    // Use a lookup table to make the non-linear input values vary more linearly with metric depth
+    int rightBot_linearizedDepth = _linearizeBuffer[rightbot];
+    std::cout << "leftTop : " << leftTop_linearizedDepth << " rightBot: " << rightBot_linearizedDepth << std::endl;
+}
 
 @end

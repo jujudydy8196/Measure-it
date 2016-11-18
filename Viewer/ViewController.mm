@@ -167,6 +167,9 @@ struct AppStatus
     AppStatus _appStatus;
     
     double measureCoords[4]; // [x1, y1, x2, y2]
+    
+    UITextView *coordView_; // For deubgging
+
 }
 
 - (BOOL)connectAndStartStreaming;
@@ -189,6 +192,14 @@ struct AppStatus
     
     _sensorController = [STSensorController sharedController];
     _sensorController.delegate = self;
+    
+        coordView_ = [[UITextView alloc] initWithFrame:CGRectMake(0,15,self.view.frame.size.width,35)];
+        [coordView_ setOpaque:false]; // Set to be Opaque
+        [coordView_ setBackgroundColor:[UIColor clearColor]]; // Set background color to be clear
+        [coordView_ setTextColor:[UIColor redColor]]; // Set text to be RED
+        [coordView_ setFont:[UIFont systemFontOfSize:18]]; // Set the Font size
+        [self.view addSubview:coordView_];
+
 
     // Create three image views where we will render our frames
     
@@ -238,8 +249,8 @@ struct AppStatus
 
 - (void)dealloc
 {
-//    free(_linearizeBuffer);
-//    free(_coloredDepthBuffer);
+    free(_linearizeBuffer);
+    free(_coloredDepthBuffer);
 //    free(_normalsBuffer);
 //    free(_colorImageBuffer);
 }
@@ -298,11 +309,16 @@ struct AppStatus
 
 - (BOOL)connectAndStartStreaming
 {
+    std::cout << "connectAndStartStreaming" << std::endl;
     STSensorControllerInitStatus result = [_sensorController initializeSensorConnection];
+
+    std::cout << "connectAndStartStreaming result" << result << std::endl;
     
     BOOL didSucceed =
         result == STSensorControllerInitStatusSuccess
      || result == STSensorControllerInitStatusAlreadyInitialized;
+    
+    std::cout << "connectAndStartStreaming didSucceed " << didSucceed << std::endl;
 
     if (didSucceed)
     {
@@ -426,8 +442,10 @@ struct AppStatus
         case AppStatus::SensorStatusNeedsUserToConnect:
         {
             [self showAppStatusMessage:_appStatus.pleaseConnectSensorMessage];
-
-            return;
+//
+//            return;
+            // hack Yi
+            break;
         }
             
         case AppStatus::SensorStatusNeedsUserToCharge:
@@ -521,7 +539,7 @@ struct AppStatus
 - (void)sensorDidOutputDepthFrame:(STDepthFrame *)depthFrame
 {
     [self renderDepthFrame:depthFrame];
-    [self renderNormalsFrame:depthFrame];
+//    [self renderNormalsFrame:depthFrame];
 }
 
 // This synchronized API will only be called when two frames match.
@@ -533,8 +551,8 @@ struct AppStatus
                                    colorFrame:(STColorFrame *)colorFrame
 {
     [self renderDepthFrame:depthFrame];
-    [self renderNormalsFrame:depthFrame];
-    [self renderColorFrame:colorFrame.sampleBuffer];
+//    [self renderNormalsFrame:depthFrame];
+//    [self renderColorFrame:colorFrame.sampleBuffer];
 }
 
 //------------------------------------------------------------------------------
@@ -968,5 +986,73 @@ const uint16_t maxShiftValue = 2048;
 
     [_sensorController frameSyncNewColorBuffer:sampleBuffer];
 }
+
+- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    CGPoint currentPoint = [touch locationInView:self.view];
+    std::cout << "touches began " << currentPoint.x << ", " << currentPoint.y << std::endl;
+    NSString *coord_NSStr = [NSString stringWithFormat:@"touches began (%2.2f, %2.2f)",
+                             currentPoint.x, currentPoint.y];
+    coordView_.text = coord_NSStr;
+    // TODO Yi: draw square around current selections
+}
+
+- (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    CGPoint currentPoint = [touch locationInView:self.view];
+    std::cout << "touches moved " << currentPoint.x << ", " << currentPoint.y << std::endl;
+    NSString *coord_NSStr = [NSString stringWithFormat:@"touches moved (%2.2f, %2.2f)",
+                             currentPoint.x, currentPoint.y];
+    coordView_.text = coord_NSStr;
+    // TODO Yi: draw square around current selections
+    
+//    UIGraphicsBeginImageContext(self.view.frame.size);
+//    [self.tempDrawImage.image drawInRect:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+//    CGContextMoveToPoint(UIGraphicsGetCurrentContext(), lastPoint.x, lastPoint.y);
+//    CGContextAddLineToPoint(UIGraphicsGetCurrentContext(), currentPoint.x, currentPoint.y);
+//    CGContextSetLineCap(UIGraphicsGetCurrentContext(), kCGLineCapRound);
+//    CGContextSetLineWidth(UIGraphicsGetCurrentContext(), brush);
+//    CGContextSetRGBStrokeColor(UIGraphicsGetCurrentContext(), red, green, blue, 1.0);
+//    CGContextSetBlendMode(UIGraphicsGetCurrentContext(), kCGBlendModeNormal);
+//    
+//    CGContextStrokePath(UIGraphicsGetCurrentContext());
+//    self.tempDrawImage.image = UIGraphicsGetImageFromCurrentImageContext();
+//    [self.tempDrawImage setAlpha:opacity];
+//    UIGraphicsEndImageContext();
+}
+
+- (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    CGPoint currentPoint = [touch locationInView:self.view];
+    std::cout << "touches ended " << currentPoint.x << ", " << currentPoint.y << std::endl;
+    NSString *coord_NSStr = [NSString stringWithFormat:@"touches ended (%2.2f, %2.2f)",
+                             currentPoint.x, currentPoint.y];
+    coordView_.text = coord_NSStr;
+    // TODO Yi: Alternatively update selected points
+
+//    if (!mouseSwiped) {
+//        UIGraphicsBeginImageContext(self.view.frame.size);
+//        [self.tempDrawImage.image drawInRect:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height)];
+//        CGContextSetLineCap(UIGraphicsGetCurrentContext(), kCGLineCapRound);
+//        CGContextSetLineWidth(UIGraphicsGetCurrentContext(), brush);
+//        CGContextSetRGBStrokeColor(UIGraphicsGetCurrentContext(), red, green, blue, opacity);
+//        CGContextMoveToPoint(UIGraphicsGetCurrentContext(), lastPoint.x, lastPoint.y);
+//        CGContextAddLineToPoint(UIGraphicsGetCurrentContext(), lastPoint.x, lastPoint.y);
+//        CGContextStrokePath(UIGraphicsGetCurrentContext());
+//        CGContextFlush(UIGraphicsGetCurrentContext());
+//        self.tempDrawImage.image = UIGraphicsGetImageFromCurrentImageContext();
+//        UIGraphicsEndImageContext();
+//    }
+//    
+//    UIGraphicsBeginImageContext(self.mainImage.frame.size);
+//    [self.mainImage.image drawInRect:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) blendMode:kCGBlendModeNormal alpha:1.0];
+//    [self.tempDrawImage.image drawInRect:CGRectMake(0, 0, self.view.frame.size.width, self.view.frame.size.height) blendMode:kCGBlendModeNormal alpha:opacity];
+//    self.mainImage.image = UIGraphicsGetImageFromCurrentImageContext();
+//    self.tempDrawImage.image = nil;
+//    UIGraphicsEndImageContext();
+//    NSLog(@"height: %f", self.view.frame.size.height);
+    
+}
+
 
 @end

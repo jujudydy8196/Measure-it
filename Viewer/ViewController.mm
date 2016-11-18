@@ -163,6 +163,7 @@ struct AppStatus
     
     UILabel* _statusLabel;
     
+    
     AppStatus _appStatus;
     
     double measureCoords[4]; // [x1, y1, x2, y2]
@@ -272,6 +273,7 @@ struct AppStatus
 
     [self connectAndStartStreaming];
 
+    
     fromLaunch = NO;
 
     // From now on, make sure we get notified when the app becomes active to restore the sensor state if necessary.
@@ -560,14 +562,17 @@ const uint16_t maxShiftValue = 2048;
 // Not using the SDK here for didactic purposes.
 - (void)convertShiftToRGBA:(const uint16_t*)shiftValues depthValuesCount:(size_t)depthValuesCount
 {
+    
+    std::cout << depthValuesCount << std::endl;
     for (size_t i = 0; i < depthValuesCount; i++)
     {
+        
         // We should not get higher values than maxShiftValue, but let's stay on the safe side.
         uint16_t boundedShift = std::min (shiftValues[i], maxShiftValue);
-        
         // Use a lookup table to make the non-linear input values vary more linearly with metric depth
         int linearizedDepth = _linearizeBuffer[boundedShift];
-        
+        std::cout << linearizedDepth << std::endl;
+
         // Use the upper byte of the linearized shift value to choose a base color
         // Base colors range from: (closest) White, Red, Orange, Yellow, Green, Cyan, Blue, Black (farthest)
         int lowerByte = (linearizedDepth & 0xff);
@@ -630,6 +635,7 @@ const uint16_t maxShiftValue = 2048;
     
     [self convertShiftToRGBA:depthFrame.shiftData depthValuesCount:cols * rows];
     
+    
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
     
     CGBitmapInfo bitmapInfo;
@@ -653,6 +659,7 @@ const uint16_t maxShiftValue = 2048;
     
     // Assign CGImage to UIImage
     _depthImageView.image = [UIImage imageWithCGImage:imageRef];
+
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);

@@ -1055,28 +1055,52 @@ const uint16_t maxShiftValue = 2048;
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
 }
+
+// Assume the following intrinsics, from the Structure SDK docs
+// K_RGB_QVGA       = [305.73, 0, 159.69; 0, 305.62, 119.86; 0, 0, 1]
+#define QVGA_COLS 320
+#define QVGA_ROWS 240
+#define QVGA_F_X 305.73
+#define QVGA_F_Y 305.62
+#define QVGA_C_X 159.69
+#define QVGA_C_Y 119.86
+
 - (void) distance:(STDepthFrame *)depthFrame{//:(const uint16_t*)shiftValues depthValuesCount:(size_t)depthValuesCount{
-//    measureCoords[0]=2;
-//    measureCoords[1]=10;
-//    measureCoords[2]=2;
-//    measureCoords[3]=20;
+    // TODO_judy: get intrinsic, get 3D points, get distance
+
+    float _fx = QVGA_F_X/QVGA_COLS*depthFrame.width;
+    float _fy = QVGA_F_X/QVGA_ROWS*depthFrame.height;
+    float _cx = QVGA_C_X/QVGA_COLS*depthFrame.width;
+    float _cy = QVGA_C_Y/QVGA_ROWS*depthFrame.height;
     
-//    arma::fmat K;
-//    K << 3043.72 <<       0 << 1196 << arma::endr
-//    <<       0 << 3043.72 << 1604 << arma::endr
-//    <<       0 <<    0    <<    1;
-//
+    int r1=measureCoords[1]/3.2, c1=measureCoords[0]/3.2;
+    int pointIndex1 = r1*depthFrame.width + c1;
+
+//    NSLog(@"Pt1 shift: %d depth: %f", depthFrame.shiftData[pointIndex1], depthFrame.depthInMillimeters[pointIndex1]);
     
-    NSLog(@"Central shift: %d depth: %f", depthFrame.shiftData[160*340+120], depthFrame.depthInMillimeters[160*340+120]); NSLog(@"Central shift: %d depth: %f", depthFrame.shiftData[160*340+120], depthFrame.depthInMillimeters[160*340+120]);
+    float depth1=depthFrame.depthInMillimeters[pointIndex1];
+    float x1=depth1 * (measureCoords[0] - _cx) / _fx;
+    float y1=depth1 * (_cy - measureCoords[1]) / _fy;
+    float z1=depth1;
+    std::cout << "3D pt1: (" << x1 << "," << y1<< "," << z1 << ")" << std::endl;
+
     
-//    uint16_t lefttop = std::min (shiftValues[0], maxShiftValue);
-//    // Use a lookup table to make the non-linear input values vary more linearly with metric depth
-//    int leftTop_linearizedDepth = _linearizeBuffer[lefttop];
-//    
-//    uint16_t rightbot = std::min (shiftValues[100], maxShiftValue);
-//    // Use a lookup table to make the non-linear input values vary more linearly with metric depth
-//    int rightBot_linearizedDepth = _linearizeBuffer[rightbot];
-//    std::cout << "leftTop : " << leftTop_linearizedDepth << " rightBot: " << rightBot_linearizedDepth << std::endl;
+    int r2=measureCoords[3]/3.2, c2=measureCoords[2]/3.2;
+    int pointIndex2 = r2*depthFrame.width + c2;
+
+    
+    float depth2=depthFrame.depthInMillimeters[pointIndex2];
+    float x2=depth2 * (measureCoords[2] - _cx) / _fx;
+    float y2=depth2 * (_cy - measureCoords[3]) / _fy;
+    float z2=depth2;
+    std::cout << "3D pt2: (" << x2 << "," << y2<< "," << z2 << ")" << std::endl;
+    
+    
+//    NSLog(@"Central shift: %d depth: %f", depthFrame.shiftData[160*340+120], depthFrame.depthInMillimeters[160*340+120]);
+    
+
+    
 }
+
 
 @end

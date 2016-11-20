@@ -1073,30 +1073,41 @@ const uint16_t maxShiftValue = 2048;
     float _cx = QVGA_C_X/QVGA_COLS*depthFrame.width;
     float _cy = QVGA_C_Y/QVGA_ROWS*depthFrame.height;
     
-    int r1=measureCoords[1]/3.2, c1=measureCoords[0]/3.2;
-    int pointIndex1 = r1*depthFrame.width + c1;
-
-//    NSLog(@"Pt1 shift: %d depth: %f", depthFrame.shiftData[pointIndex1], depthFrame.depthInMillimeters[pointIndex1]);
+    int centerC=depthFrame.width/2, centerR=depthFrame.height/2;
+    int imgC=1024/2, imgR=768/2;
+    int pointIndex = centerR*depthFrame.width+centerC;
+    float depth=depthFrame.depthInMillimeters[pointIndex];
+    float x=depth * (imgC - _cx) / _fx;
+    float y=depth * (_cy - imgR) / _fy;
+    float z=depth;
+    std::cout << "3D pt1: (" << x << "," << y << "," << z << ")" << std::endl;
     
-    float depth1=depthFrame.depthInMillimeters[pointIndex1];
-    float x1=depth1 * (measureCoords[0] - _cx) / _fx;
-    float y1=depth1 * (_cy - measureCoords[1]) / _fy;
-    float z1=depth1;
-    std::cout << "3D pt1: (" << x1 << "," << y1<< "," << z1 << ")" << std::endl;
-
-    
-    int r2=measureCoords[3]/3.2, c2=measureCoords[2]/3.2;
-    int pointIndex2 = r2*depthFrame.width + c2;
-
-    
-    float depth2=depthFrame.depthInMillimeters[pointIndex2];
-    float x2=depth2 * (measureCoords[2] - _cx) / _fx;
-    float y2=depth2 * (_cy - measureCoords[3]) / _fy;
-    float z2=depth2;
-    std::cout << "3D pt2: (" << x2 << "," << y2<< "," << z2 << ")" << std::endl;
-    
-    
-//    NSLog(@"Central shift: %d depth: %f", depthFrame.shiftData[160*340+120], depthFrame.depthInMillimeters[160*340+120]);
+//    int r1=measureCoords[1]/3.2, c1=measureCoords[0]/3.2;
+//    int pointIndex1 = r1*depthFrame.width + c1;
+//    std::cout << "point1 coord: " << r1 << " " << c1 << std::endl;
+//
+////    NSLog(@"Pt1 shift: %d depth: %f", depthFrame.shiftData[pointIndex1], depthFrame.depthInMillimeters[pointIndex1]);
+//    
+//    float depth1=depthFrame.depthInMillimeters[pointIndex1];
+//    float x1=depth1 * (measureCoords[0] - _cx) / _fx;
+//    float y1=depth1 * (_cy - measureCoords[1]) / _fy;
+//    float z1=depth1;
+//    std::cout << "3D pt1: (" << x1 << "," << y1<< "," << z1 << ")" << std::endl;
+//
+//    
+//    int r2=measureCoords[3]/3.2, c2=measureCoords[2]/3.2;
+//    int pointIndex2 = r2*depthFrame.width + c2;
+//    std::cout << "point2 coord: " << r2 << " " << c2 << std::endl;
+//
+//    
+//    float depth2=depthFrame.depthInMillimeters[pointIndex2];
+//    float x2=depth2 * (measureCoords[2] - _cx) / _fx;
+//    float y2=depth2 * (_cy - measureCoords[3]) / _fy;
+//    float z2=depth2;
+//    std::cout << "3D pt2: (" << x2 << "," << y2<< "," << z2 << ")" << std::endl;
+//    
+//    
+////    NSLog(@"Central shift: %d depth: %f", depthFrame.shiftData[160*340+120], depthFrame.depthInMillimeters[160*340+120]);
     
 
     

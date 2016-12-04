@@ -12,7 +12,7 @@
 #include <iostream>
 
 //------------------------------------------------------------------------------
-
+using namespace std;
 namespace {
 
 bool
@@ -987,12 +987,20 @@ const uint16_t maxShiftValue = 2048;
 
 - (void) updateNextPoint: (CGPoint) p {
     // Update the measurement point specified by cursor with given CGPoint and update cursor.
-    
-    // normalize to depth frame resolution
-    measureCoords[measurePtCursor*2] = p.x * (depthFrameWidth / self.view.frame.size.width);
-    measureCoords[measurePtCursor*2+1] = p.y * (depthFrameHeight / self.view.frame.size.height);
+    if (depthFrameWidth == 0 || depthFrameHeight == 0){
+        std::cout << "Depth Frame size not found" << std::endl;
+        measureCoords[measurePtCursor*2] = p.x;
+        measureCoords[measurePtCursor*2+1] = p.y;
+    } else {
+        // normalize to depth frame resolution
+        measureCoords[measurePtCursor*2] = p.x * (depthFrameWidth / self.view.frame.size.width);
+        measureCoords[measurePtCursor*2+1] = p.y * (depthFrameHeight / self.view.frame.size.height);
+    }
     
     measurePtCursor = (measurePtCursor + 1) % 2;
+    
+    std::cout << "(" << measureCoords[0] << ", " << measureCoords[1] << ") to ("
+    << measureCoords[2] << "," << measureCoords[3] << ")" << std::endl;
 }
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {

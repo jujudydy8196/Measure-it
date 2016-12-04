@@ -202,7 +202,7 @@
 				ORGANIZATIONNAME = Occipital;
 				TargetAttributes = {
 					6F7C0CBC17F0EA0500692EC1 = {
-						DevelopmentTeam = 3QBQHF22WR;
+						DevelopmentTeam = U77NSNB299;
 					};
 				};
 			};
@@ -307,6 +307,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 3QBQHF22WR;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -319,8 +321,9 @@
 					"-framework",
 					ExternalAccessory,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.structure.sample.Viewer.yh;
+				PRODUCT_BUNDLE_IDENTIFIER = io.structure.sample.Viewer.judy;
 				PRODUCT_NAME = MeasureIt;
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -363,6 +366,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 3QBQHF22WR;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -375,8 +380,9 @@
 					"-framework",
 					ExternalAccessory,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = io.structure.sample.Viewer.yh;
+				PRODUCT_BUNDLE_IDENTIFIER = io.structure.sample.Viewer.judy;
 				PRODUCT_NAME = MeasureIt;
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};

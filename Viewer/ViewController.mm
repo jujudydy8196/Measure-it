@@ -1028,8 +1028,18 @@ const uint16_t maxShiftValue = 2048;
                                      halfSquare*2, halfSquare*2);
     CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
     CGContextStrokeRect(context, selectedRect);
+    
+    if (!measurePtCursor) {
+        std::cout << "add another in touch begin" << std::endl;
+        CGRect prevRect = CGRectMake(measureCoords[0] - halfSquare, measureCoords[1] - halfSquare,
+                                     halfSquare*2, halfSquare*2);
+        CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
+        CGContextStrokeRect(context, prevRect);
+    }
+    
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
+    
 }
 
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
@@ -1047,6 +1057,21 @@ const uint16_t maxShiftValue = 2048;
                                     halfSquare*2, halfSquare*2);
     CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
     CGContextStrokeRect(context, selectedRect);
+    if (measurePtCursor) {
+        std::cout << "add another in touch move" << std::endl;
+        CGRect prevRect = CGRectMake(measureCoords[0] - halfSquare, measureCoords[1] - halfSquare,
+                                     halfSquare*2, halfSquare*2);
+        CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
+        CGContextStrokeRect(context, prevRect);
+        CGContextSetLineWidth(context,3.0f);
+        /* Start the line at this point */
+        CGContextMoveToPoint(context,measureCoords[0], measureCoords[1]);
+        /* And end it at this point */
+        CGContextAddLineToPoint(context,currentPoint.x, currentPoint.y);
+        /* Use the context's current color to draw the line */
+        CGContextStrokePath(context);
+    }
+    
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
 }
@@ -1070,6 +1095,22 @@ const uint16_t maxShiftValue = 2048;
                                      halfSquare*2, halfSquare*2);
     CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
     CGContextStrokeRect(context, selectedRect);
+    
+    if (!measurePtCursor) {
+        std::cout << "add another in touch end" << std::endl;
+        CGRect prevRect = CGRectMake(measureCoords[0] - halfSquare, measureCoords[1] - halfSquare,
+                                     halfSquare*2, halfSquare*2);
+        CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
+        CGContextStrokeRect(context, prevRect);
+        CGContextSetLineWidth(context,3.0f);
+        /* Start the line at this point */
+        CGContextMoveToPoint(context,measureCoords[0], measureCoords[1]);
+        /* And end it at this point */
+        CGContextAddLineToPoint(context,measureCoords[2], measureCoords[3]);
+        /* Use the context's current color to draw the line */
+        CGContextStrokePath(context);
+    }
+    
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
 }

@@ -10,6 +10,7 @@
 #import <Accelerate/Accelerate.h>
 #import <algorithm>
 #include <iostream>
+#include "opencv2/imgproc/imgproc.hpp"
 
 //------------------------------------------------------------------------------
 using namespace std;
@@ -152,12 +153,12 @@ struct AppStatus
 
     UIImageView *_depthImageView;
 //    UIImageView *_normalsImageView;
-//    UIImageView *_colorImageView;
+    UIImageView *_colorImageView;
     
     uint16_t *_linearizeBuffer;
     uint8_t *_coloredDepthBuffer;
 //    uint8_t *_normalsBuffer;
-//    uint8_t *_colorImageBuffer;
+    uint8_t *_colorImageBuffer;
 
 //    STNormalEstimator *_normalsEstimator;
     
@@ -208,7 +209,7 @@ struct AppStatus
     _linearizeBuffer = NULL;
 //    _coloredDepthBuffer = NULL;
 //    _normalsBuffer = NULL;
-//    _colorImageBuffer = NULL;
+    _colorImageBuffer = NULL;
 
     _depthImageView = [[UIImageView alloc] initWithFrame:depthFrame];
     _depthImageView.contentMode = UIViewContentModeScaleAspectFit;
@@ -254,7 +255,7 @@ struct AppStatus
     free(_linearizeBuffer);
     free(_coloredDepthBuffer);
 //    free(_normalsBuffer);
-//    free(_colorImageBuffer);
+    free(_colorImageBuffer);
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -558,7 +559,7 @@ struct AppStatus
 {
     [self renderDepthFrame:depthFrame];
 //    [self renderNormalsFrame:depthFrame];
-//    [self renderColorFrame:colorFrame.sampleBuffer];
+    [self renderColorFrame:colorFrame.sampleBuffer];
 }
 
 //------------------------------------------------------------------------------
@@ -684,8 +685,10 @@ const uint16_t maxShiftValue = 2048;
                                        kCGRenderingIntentDefault);  //rendering intent
     
     // Assign CGImage to UIImage
-    _depthImageView.image = [UIImage imageWithCGImage:imageRef];
-
+//    _depthImageView.image = [UIImage imageWithCGImage:imageRef];
+    
+    // Find geometrically interesting points
+    _depthImageView.image = [self findInterestEdges:[UIImage imageWithCGImage:imageRef]];
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
@@ -742,75 +745,80 @@ const uint16_t maxShiftValue = 2048;
 //    CGColorSpaceRelease(colorSpace);
 //}
 
-//- (void)renderColorFrame:(CMSampleBufferRef)yCbCrSampleBuffer
-//{
-//    
-//    CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(yCbCrSampleBuffer);
-//    
-//    // get image size
-//    size_t cols = CVPixelBufferGetWidth(pixelBuffer);
-//    size_t rows = CVPixelBufferGetHeight(pixelBuffer);
-//    
-//    // allocate memory for RGBA image for the first time
-//    if(_colorImageBuffer==NULL)
-//        _colorImageBuffer = (uint8_t*)malloc(cols * rows * 4);
-//    
-//    // color space
-//    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-//    
-//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-//    
-//    // get y plane
-//    const uint8_t* yData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
-//    
-//    // get cbCr plane
-//    const uint8_t* cbCrData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
-//    
-//    size_t yBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
-//    size_t cbcrBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
-//    assert( yBytePerRow==cbcrBytePerRow );
-//
-//    uint8_t* bgra = _colorImageBuffer;
-//    
-//    bool ok = convertYCbCrToBGRA(cols, rows, yData, cbCrData, bgra, 0xff, yBytePerRow, cbcrBytePerRow, 4 * cols);
-//
-//    if (!ok)
-//    {
-//        NSLog(@"YCbCr to BGRA conversion failed.");
-//        return;
-//    }
-//
-//    NSData *data = [[NSData alloc] initWithBytes:_colorImageBuffer length:rows*cols*4];
-//    
-//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-//    
-//    CGBitmapInfo bitmapInfo;
-//    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipFirst;
-//    bitmapInfo |= kCGBitmapByteOrder32Little;
-//    
-//    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
-//    
-//    CGImageRef imageRef = CGImageCreate(
-//        cols,
-//        rows,
-//        8,
-//        8 * 4,
-//        cols*4,
-//        colorSpace,
-//        bitmapInfo,
-//        provider,
-//        NULL,
-//        false,
-//        kCGRenderingIntentDefault
-//    );
-//    
+- (void)renderColorFrame:(CMSampleBufferRef)yCbCrSampleBuffer
+{
+    
+    CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(yCbCrSampleBuffer);
+    
+    // get image size
+    size_t cols = CVPixelBufferGetWidth(pixelBuffer);
+    size_t rows = CVPixelBufferGetHeight(pixelBuffer);
+    
+    // allocate memory for RGBA image for the first time
+    if(_colorImageBuffer==NULL)
+        _colorImageBuffer = (uint8_t*)malloc(cols * rows * 4);
+    
+    // color space
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    
+    // get y plane
+    const uint8_t* yData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+    
+    // get cbCr plane
+    const uint8_t* cbCrData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+    
+    size_t yBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    size_t cbcrBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    assert( yBytePerRow==cbcrBytePerRow );
+
+    uint8_t* bgra = _colorImageBuffer;
+    
+    bool ok = convertYCbCrToBGRA(cols, rows, yData, cbCrData, bgra, 0xff, yBytePerRow, cbcrBytePerRow, 4 * cols);
+
+    if (!ok)
+    {
+        NSLog(@"YCbCr to BGRA conversion failed.");
+        return;
+    }
+
+    NSData *data = [[NSData alloc] initWithBytes:_colorImageBuffer length:rows*cols*4];
+    
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+    
+    CGBitmapInfo bitmapInfo;
+    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipFirst;
+    bitmapInfo |= kCGBitmapByteOrder32Little;
+    
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
+    
+    CGImageRef imageRef = CGImageCreate(
+        cols,
+        rows,
+        8,
+        8 * 4,
+        cols*4,
+        colorSpace,
+        bitmapInfo,
+        provider,
+        NULL,
+        false,
+        kCGRenderingIntentDefault
+    );
+    
 //    _colorImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
-//    
-//    CGImageRelease(imageRef);
-//    CGDataProviderRelease(provider);
-//    CGColorSpaceRelease(colorSpace);
-//}
-//
+//    _depthImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
+    // Find geometrically interesting points
+//    _depthImageView.image = [self findInterstPoints:[UIImage imageWithCGImage:imageRef]];
+
+//    std::cout <<"rendering color to depthImageView" << std::endl;
+  
+    CGImageRelease(imageRef);
+    CGDataProviderRelease(provider);
+    CGColorSpaceRelease(colorSpace);
+}
+
 //------------------------------------------------------------------------------
 
 #pragma mark -  AVFoundation
@@ -1180,6 +1188,130 @@ const uint16_t maxShiftValue = 2048;
 
     
 }
+
+- (UIImage *) findInterstPoints: (UIImage *)depthImage {
+    // Harris corner detector
+    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+    cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
+    cv::Mat dst, dst_norm, dst_norm_scaled;
+    dst = cv::Mat::zeros( gray.size(), CV_32FC1 );
+    
+    /// Detector parameters
+    int blockSize = 2;
+    int apertureSize = 3;
+    double k = 0.04;
+    int thresh = 200;
+    
+    /// Detecting corners
+    cv::cornerHarris( gray, dst, blockSize, apertureSize, k, cv::BORDER_DEFAULT );
+    
+    /// Normalizing
+    cv::normalize( dst, dst_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat() );
+//    cv::convertScaleAbs( dst_norm, dst_norm_scaled );
+    
+    /// Drawing a circle around corners
+    for( int j = 0; j < dst_norm.rows ; j++ ){
+        for( int i = 0; i < dst_norm.cols; i++ ){
+            if( (int) dst_norm.at<float>(j,i) > thresh ){
+                cv::circle( cvImage, cv::Point( i, j ), 5,  cv::Scalar(255, 0, 0), 2, 8, 0 );
+            }
+        }
+    }
+    
+    return [self UIImageFromCVMat:cvImage];
+
+}
+
+- (UIImage *)findInterestEdges: (UIImage *)depthImage {
+    
+    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+    cv::Mat dst, cdst;
+    cv::Canny(cvImage, dst, 50, 200, 3);
+    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
+    
+    vector<cv::Vec2f> lines;
+    cv::HoughLines(dst, lines, 1, CV_PI/180, 75, 0, 0 );
+    
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        float rho = lines[i][0], theta = lines[i][1];
+        cv::Point pt1, pt2;
+        double a = cos(theta), b = sin(theta);
+        double x0 = a*rho, y0 = b*rho;
+        pt1.x = cvRound(x0 + 1000*(-b));
+        pt1.y = cvRound(y0 + 1000*(a));
+        pt2.x = cvRound(x0 - 1000*(-b));
+        pt2.y = cvRound(y0 - 1000*(a));
+//        cv::line( cvImage, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
+        cv::line( cdst, pt1, pt2, cv::Scalar(0,0,255), 1, CV_AA);
+
+    }
+    return [self UIImageFromCVMat:cdst];
+}
+
+//---------------- Provided functions from class ------------------
+// Member functions for converting from cvMat to UIImage
+- (cv::Mat)cvMatFromUIImage:(UIImage *)image
+{
+    CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
+    CGFloat cols = image.size.width;
+    CGFloat rows = image.size.height;
+    
+    cv::Mat cvMat(rows, cols, CV_8UC4); // 8 bits per component, 4 channels (color channels + alpha)
+    
+    CGContextRef contextRef = CGBitmapContextCreate(cvMat.data,                 // Pointer to  data
+                                                    cols,                       // Width of bitmap
+                                                    rows,                       // Height of bitmap
+                                                    8,                          // Bits per component
+                                                    cvMat.step[0],              // Bytes per row
+                                                    colorSpace,                 // Colorspace
+                                                    kCGImageAlphaNoneSkipLast |
+                                                    kCGBitmapByteOrderDefault); // Bitmap info flags
+    
+    CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
+    CGContextRelease(contextRef);
+    
+    return cvMat;
+}
+// Member functions for converting from UIImage to cvMat
+-(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat
+{
+    NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
+    CGColorSpaceRef colorSpace;
+    
+    if (cvMat.elemSize() == 1) {
+        colorSpace = CGColorSpaceCreateDeviceGray();
+    } else {
+        colorSpace = CGColorSpaceCreateDeviceRGB();
+    }
+    
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
+    
+    // Creating CGImage from cv::Mat
+    CGImageRef imageRef = CGImageCreate(cvMat.cols,                                 //width
+                                        cvMat.rows,                                 //height
+                                        8,                                          //bits per component
+                                        8 * cvMat.elemSize(),                       //bits per pixel
+                                        cvMat.step[0],                            //bytesPerRow
+                                        colorSpace,                                 //colorspace
+                                        kCGImageAlphaNone|kCGBitmapByteOrderDefault,// bitmap info
+                                        provider,                                   //CGDataProviderRef
+                                        NULL,                                       //decode
+                                        false,                                      //should interpolate
+                                        kCGRenderingIntentDefault                   //intent
+                                        );
+    
+    
+    // Getting UIImage from CGImage
+    UIImage *finalImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    CGDataProviderRelease(provider);
+    CGColorSpaceRelease(colorSpace);
+    
+    return finalImage;
+}
+
+
 
 
 @end

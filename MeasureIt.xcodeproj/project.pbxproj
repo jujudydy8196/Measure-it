@@ -10,6 +10,7 @@
 		01FAFAF21964A14700BF040D /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 01FAFAF11964A14700BF040D /* QuartzCore.framework */; };
 		0F6C126D1DDF91F10096CCC3 /* Structure.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F6C126C1DDF91F10096CCC3 /* Structure.framework */; };
 		0F6C126F1DDF93480096CCC3 /* libz.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F6C126E1DDF93480096CCC3 /* libz.1.dylib */; };
+		0F7F55151DF3BAC70097C810 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F7F55141DF3BAC70097C810 /* opencv2.framework */; };
 		2A4C2EB0194A01FB00DC208C /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2A4C2EAC194A01FB00DC208C /* Default-568h@2x.png */; };
 		2A4C2EB1194A01FB00DC208C /* Default-Landscape@2x~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 2A4C2EAD194A01FB00DC208C /* Default-Landscape@2x~ipad.png */; };
 		2A4C2EB2194A01FB00DC208C /* Default-Landscape~ipad.png in Resources */ = {isa = PBXBuildFile; fileRef = 2A4C2EAE194A01FB00DC208C /* Default-Landscape~ipad.png */; };
@@ -39,6 +40,7 @@
 		01FAFAF11964A14700BF040D /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		0F6C126C1DDF91F10096CCC3 /* Structure.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Structure.framework; sourceTree = "<group>"; };
 		0F6C126E1DDF93480096CCC3 /* libz.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.dylib; path = ../../../../usr/lib/libz.1.dylib; sourceTree = "<group>"; };
+		0F7F55141DF3BAC70097C810 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
 		2A4C2EAC194A01FB00DC208C /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "Graphics/Default-568h@2x.png"; sourceTree = "<group>"; };
 		2A4C2EAD194A01FB00DC208C /* Default-Landscape@2x~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape@2x~ipad.png"; path = "Graphics/Default-Landscape@2x~ipad.png"; sourceTree = "<group>"; };
 		2A4C2EAE194A01FB00DC208C /* Default-Landscape~ipad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Landscape~ipad.png"; path = "Graphics/Default-Landscape~ipad.png"; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 				6F1239081862A59D00BD1D7A /* Accelerate.framework in Frameworks */,
 				6F2B4EDD1865325D00403B8C /* OpenGLES.framework in Frameworks */,
 				6F12390A1862A5D300BD1D7A /* ImageIO.framework in Frameworks */,
+				0F7F55151DF3BAC70097C810 /* opencv2.framework in Frameworks */,
 				6F2B4EE1186532A500403B8C /* CoreMedia.framework in Frameworks */,
 				6F2B4EDB1865324D00403B8C /* CoreGraphics.framework in Frameworks */,
 				6F2B4EDF1865326B00403B8C /* CoreImage.framework in Frameworks */,
@@ -127,6 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				0F6C126E1DDF93480096CCC3 /* libz.1.dylib */,
+				0F7F55141DF3BAC70097C810 /* opencv2.framework */,
 				77AAADA61CA5B2F000D91B6C /* Metal.framework */,
 				0F6C126C1DDF91F10096CCC3 /* Structure.framework */,
 				2DFFE048199142E800761886 /* CoreMotion.framework */,

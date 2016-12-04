@@ -10,108 +10,109 @@
 #import <Accelerate/Accelerate.h>
 #import <algorithm>
 #include <iostream>
+#include "opencv2/imgproc/imgproc.hpp"
 
 //------------------------------------------------------------------------------
 using namespace std;
-namespace {
+//namespace {
 
-bool
-convertYCbCrToBGRA (
-    size_t width,
-    size_t height,
-    const uint8_t* yData,
-    const uint8_t* cbcrData,
-    uint8_t* rgbaData,
-    uint8_t alpha,
-    size_t yBytesPerRow,
-    size_t cbCrBytesPerRow,
-    size_t rgbaBytesPerRow)
-{
-    assert(width <= rgbaBytesPerRow);
-    
-    // Input RGBA buffer:
-    
-    vImage_Buffer rgbaBuffer
-    {
-        .data = (void*)rgbaData,
-        .width = (size_t)width,
-        .height = (size_t)height,
-        .rowBytes = rgbaBytesPerRow
-    };
-    
-    // Destination Y, CbCr buffers:
-    
-    vImage_Buffer cbCrBuffer
-    {
-        .data = (void*)cbcrData,
-        .width = (size_t)width/2,
-        .height = (size_t)height/2,
-        .rowBytes = (size_t)cbCrBytesPerRow // 2 bytes per pixel (Cb+Cr)
-    };
-    
-    vImage_Buffer yBuffer
-    {
-        .data = (void*)yData,
-        .width = (size_t)width,
-        .height = (size_t)height,
-        .rowBytes = (size_t)yBytesPerRow
-    };
+//bool
+//convertYCbCrToBGRA (
+//    size_t width,
+//    size_t height,
+//    const uint8_t* yData,
+//    const uint8_t* cbcrData,
+//    uint8_t* rgbaData,
+//    uint8_t alpha,
+//    size_t yBytesPerRow,
+//    size_t cbCrBytesPerRow,
+//    size_t rgbaBytesPerRow)
+//{
+//    assert(width <= rgbaBytesPerRow);
+//    
+//    // Input RGBA buffer:
+//    
+//    vImage_Buffer rgbaBuffer
+//    {
+//        .data = (void*)rgbaData,
+//        .width = (size_t)width,
+//        .height = (size_t)height,
+//        .rowBytes = rgbaBytesPerRow
+//    };
+//    
+//    // Destination Y, CbCr buffers:
+//    
+//    vImage_Buffer cbCrBuffer
+//    {
+//        .data = (void*)cbcrData,
+//        .width = (size_t)width/2,
+//        .height = (size_t)height/2,
+//        .rowBytes = (size_t)cbCrBytesPerRow // 2 bytes per pixel (Cb+Cr)
+//    };
+//    
+//    vImage_Buffer yBuffer
+//    {
+//        .data = (void*)yData,
+//        .width = (size_t)width,
+//        .height = (size_t)height,
+//        .rowBytes = (size_t)yBytesPerRow
+//    };
+//
+//    vImage_Error error = kvImageNoError;
+//    
+//    // Conversion information:
+//    
+//    static vImage_YpCbCrToARGB info;
+//    {
+//        static bool infoGenerated = false;
+//    
+//        if(!infoGenerated)
+//        {
+//            vImage_Flags flags = kvImageNoFlags;
+//            
+//            vImage_YpCbCrPixelRange pixelRange
+//            {
+//                .Yp_bias =      0,
+//                .CbCr_bias =    128,
+//                .YpRangeMax =   255,
+//                .CbCrRangeMax = 255,
+//                .YpMax =        255,
+//                .YpMin =        0,
+//                .CbCrMax=       255,
+//                .CbCrMin =      1
+//            };
+//
+//            error = vImageConvert_YpCbCrToARGB_GenerateConversion(
+//                kvImage_YpCbCrToARGBMatrix_ITU_R_601_4,
+//                &pixelRange,
+//                &info,
+//                kvImage420Yp8_CbCr8, kvImageARGB8888,
+//                flags
+//            );
+//            
+//            if (kvImageNoError != error)
+//                return false;
+//
+//            infoGenerated = true;
+//        }
+//    }
+//
+//    static const uint8_t permuteMapBGRA [4] { 3, 2, 1, 0 };
+//
+//    error = vImageConvert_420Yp8_CbCr8ToARGB8888(
+//        &yBuffer,
+//        &cbCrBuffer,
+//        &rgbaBuffer,
+//        &info,
+//        permuteMapBGRA,
+//        255,
+//        kvImageNoFlags | kvImageDoNotTile // Disable multithreading.
+//    );
+//
+//    return kvImageNoError == error;
+//}
 
-    vImage_Error error = kvImageNoError;
-    
-    // Conversion information:
-    
-    static vImage_YpCbCrToARGB info;
-    {
-        static bool infoGenerated = false;
-    
-        if(!infoGenerated)
-        {
-            vImage_Flags flags = kvImageNoFlags;
-            
-            vImage_YpCbCrPixelRange pixelRange
-            {
-                .Yp_bias =      0,
-                .CbCr_bias =    128,
-                .YpRangeMax =   255,
-                .CbCrRangeMax = 255,
-                .YpMax =        255,
-                .YpMin =        0,
-                .CbCrMax=       255,
-                .CbCrMin =      1
-            };
-
-            error = vImageConvert_YpCbCrToARGB_GenerateConversion(
-                kvImage_YpCbCrToARGBMatrix_ITU_R_601_4,
-                &pixelRange,
-                &info,
-                kvImage420Yp8_CbCr8, kvImageARGB8888,
-                flags
-            );
-            
-            if (kvImageNoError != error)
-                return false;
-
-            infoGenerated = true;
-        }
-    }
-
-    static const uint8_t permuteMapBGRA [4] { 3, 2, 1, 0 };
-
-    error = vImageConvert_420Yp8_CbCr8ToARGB8888(
-        &yBuffer,
-        &cbCrBuffer,
-        &rgbaBuffer,
-        &info,
-        permuteMapBGRA,
-        255,
-        kvImageNoFlags | kvImageDoNotTile // Disable multithreading.
-    );
-
-    return kvImageNoError == error;
-}
-
-} // namespace
+//} // namespace
 
 //------------------------------------------------------------------------------
 
@@ -674,8 +675,10 @@ const uint16_t maxShiftValue = 2048;
                                        kCGRenderingIntentDefault);  //rendering intent
     
     // Assign CGImage to UIImage
-    _depthImageView.image = [UIImage imageWithCGImage:imageRef];
-
+//    _depthImageView.image = [UIImage imageWithCGImage:imageRef];
+    
+    // Find geometrically interesting points
+    _depthImageView.image = [self findInterstPoints:[UIImage imageWithCGImage:imageRef]];
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
@@ -1120,6 +1123,105 @@ const uint16_t maxShiftValue = 2048;
 
     
 }
+
+- (UIImage *) findInterstPoints: (UIImage *)depthImage {
+    // TODO YI: run harris corner detector
+    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+    cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
+    cv::Mat dst, dst_norm, dst_norm_scaled;
+    dst = cv::Mat::zeros( gray.size(), CV_32FC1 );
+    
+    /// Detector parameters
+    int blockSize = 2;
+    int apertureSize = 3;
+    double k = 0.04;
+    int thresh = 200;
+    
+    /// Detecting corners
+    cv::cornerHarris( gray, dst, blockSize, apertureSize, k, cv::BORDER_DEFAULT );
+    
+    /// Normalizing
+    cv::normalize( dst, dst_norm, 0, 255, cv::NORM_MINMAX, CV_32FC1, cv::Mat() );
+//    cv::convertScaleAbs( dst_norm, dst_norm_scaled );
+    
+    /// Drawing a circle around corners
+    for( int j = 0; j < dst_norm.rows ; j++ )
+    { for( int i = 0; i < dst_norm.cols; i++ )
+    {
+        if( (int) dst_norm.at<float>(j,i) > thresh )
+        {
+            cv::circle( cvImage, cv::Point( i, j ), 5,  cv::Scalar(255, 0, 0), 2, 8, 0 );
+        }
+    }
+    }
+    
+    return [self UIImageFromCVMat:cvImage];
+
+}
+
+//---------------- Provided functions from class ------------------
+// Member functions for converting from cvMat to UIImage
+- (cv::Mat)cvMatFromUIImage:(UIImage *)image
+{
+    CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
+    CGFloat cols = image.size.width;
+    CGFloat rows = image.size.height;
+    
+    cv::Mat cvMat(rows, cols, CV_8UC4); // 8 bits per component, 4 channels (color channels + alpha)
+    
+    CGContextRef contextRef = CGBitmapContextCreate(cvMat.data,                 // Pointer to  data
+                                                    cols,                       // Width of bitmap
+                                                    rows,                       // Height of bitmap
+                                                    8,                          // Bits per component
+                                                    cvMat.step[0],              // Bytes per row
+                                                    colorSpace,                 // Colorspace
+                                                    kCGImageAlphaNoneSkipLast |
+                                                    kCGBitmapByteOrderDefault); // Bitmap info flags
+    
+    CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
+    CGContextRelease(contextRef);
+    
+    return cvMat;
+}
+// Member functions for converting from UIImage to cvMat
+-(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat
+{
+    NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
+    CGColorSpaceRef colorSpace;
+    
+    if (cvMat.elemSize() == 1) {
+        colorSpace = CGColorSpaceCreateDeviceGray();
+    } else {
+        colorSpace = CGColorSpaceCreateDeviceRGB();
+    }
+    
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
+    
+    // Creating CGImage from cv::Mat
+    CGImageRef imageRef = CGImageCreate(cvMat.cols,                                 //width
+                                        cvMat.rows,                                 //height
+                                        8,                                          //bits per component
+                                        8 * cvMat.elemSize(),                       //bits per pixel
+                                        cvMat.step[0],                            //bytesPerRow
+                                        colorSpace,                                 //colorspace
+                                        kCGImageAlphaNone|kCGBitmapByteOrderDefault,// bitmap info
+                                        provider,                                   //CGDataProviderRef
+                                        NULL,                                       //decode
+                                        false,                                      //should interpolate
+                                        kCGRenderingIntentDefault                   //intent
+                                        );
+    
+    
+    // Getting UIImage from CGImage
+    UIImage *finalImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    CGDataProviderRelease(provider);
+    CGColorSpaceRelease(colorSpace);
+    
+    return finalImage;
+}
+
+
 
 
 @end

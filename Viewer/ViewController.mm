@@ -14,105 +14,105 @@
 
 //------------------------------------------------------------------------------
 using namespace std;
-//namespace {
+namespace {
 
-//bool
-//convertYCbCrToBGRA (
-//    size_t width,
-//    size_t height,
-//    const uint8_t* yData,
-//    const uint8_t* cbcrData,
-//    uint8_t* rgbaData,
-//    uint8_t alpha,
-//    size_t yBytesPerRow,
-//    size_t cbCrBytesPerRow,
-//    size_t rgbaBytesPerRow)
-//{
-//    assert(width <= rgbaBytesPerRow);
-//    
-//    // Input RGBA buffer:
-//    
-//    vImage_Buffer rgbaBuffer
-//    {
-//        .data = (void*)rgbaData,
-//        .width = (size_t)width,
-//        .height = (size_t)height,
-//        .rowBytes = rgbaBytesPerRow
-//    };
-//    
-//    // Destination Y, CbCr buffers:
-//    
-//    vImage_Buffer cbCrBuffer
-//    {
-//        .data = (void*)cbcrData,
-//        .width = (size_t)width/2,
-//        .height = (size_t)height/2,
-//        .rowBytes = (size_t)cbCrBytesPerRow // 2 bytes per pixel (Cb+Cr)
-//    };
-//    
-//    vImage_Buffer yBuffer
-//    {
-//        .data = (void*)yData,
-//        .width = (size_t)width,
-//        .height = (size_t)height,
-//        .rowBytes = (size_t)yBytesPerRow
-//    };
-//
-//    vImage_Error error = kvImageNoError;
-//    
-//    // Conversion information:
-//    
-//    static vImage_YpCbCrToARGB info;
-//    {
-//        static bool infoGenerated = false;
-//    
-//        if(!infoGenerated)
-//        {
-//            vImage_Flags flags = kvImageNoFlags;
-//            
-//            vImage_YpCbCrPixelRange pixelRange
-//            {
-//                .Yp_bias =      0,
-//                .CbCr_bias =    128,
-//                .YpRangeMax =   255,
-//                .CbCrRangeMax = 255,
-//                .YpMax =        255,
-//                .YpMin =        0,
-//                .CbCrMax=       255,
-//                .CbCrMin =      1
-//            };
-//
-//            error = vImageConvert_YpCbCrToARGB_GenerateConversion(
-//                kvImage_YpCbCrToARGBMatrix_ITU_R_601_4,
-//                &pixelRange,
-//                &info,
-//                kvImage420Yp8_CbCr8, kvImageARGB8888,
-//                flags
-//            );
-//            
-//            if (kvImageNoError != error)
-//                return false;
-//
-//            infoGenerated = true;
-//        }
-//    }
-//
-//    static const uint8_t permuteMapBGRA [4] { 3, 2, 1, 0 };
-//
-//    error = vImageConvert_420Yp8_CbCr8ToARGB8888(
-//        &yBuffer,
-//        &cbCrBuffer,
-//        &rgbaBuffer,
-//        &info,
-//        permuteMapBGRA,
-//        255,
-//        kvImageNoFlags | kvImageDoNotTile // Disable multithreading.
-//    );
-//
-//    return kvImageNoError == error;
-//}
+bool
+convertYCbCrToBGRA (
+    size_t width,
+    size_t height,
+    const uint8_t* yData,
+    const uint8_t* cbcrData,
+    uint8_t* rgbaData,
+    uint8_t alpha,
+    size_t yBytesPerRow,
+    size_t cbCrBytesPerRow,
+    size_t rgbaBytesPerRow)
+{
+    assert(width <= rgbaBytesPerRow);
+    
+    // Input RGBA buffer:
+    
+    vImage_Buffer rgbaBuffer
+    {
+        .data = (void*)rgbaData,
+        .width = (size_t)width,
+        .height = (size_t)height,
+        .rowBytes = rgbaBytesPerRow
+    };
+    
+    // Destination Y, CbCr buffers:
+    
+    vImage_Buffer cbCrBuffer
+    {
+        .data = (void*)cbcrData,
+        .width = (size_t)width/2,
+        .height = (size_t)height/2,
+        .rowBytes = (size_t)cbCrBytesPerRow // 2 bytes per pixel (Cb+Cr)
+    };
+    
+    vImage_Buffer yBuffer
+    {
+        .data = (void*)yData,
+        .width = (size_t)width,
+        .height = (size_t)height,
+        .rowBytes = (size_t)yBytesPerRow
+    };
 
-//} // namespace
+    vImage_Error error = kvImageNoError;
+    
+    // Conversion information:
+    
+    static vImage_YpCbCrToARGB info;
+    {
+        static bool infoGenerated = false;
+    
+        if(!infoGenerated)
+        {
+            vImage_Flags flags = kvImageNoFlags;
+            
+            vImage_YpCbCrPixelRange pixelRange
+            {
+                .Yp_bias =      0,
+                .CbCr_bias =    128,
+                .YpRangeMax =   255,
+                .CbCrRangeMax = 255,
+                .YpMax =        255,
+                .YpMin =        0,
+                .CbCrMax=       255,
+                .CbCrMin =      1
+            };
+
+            error = vImageConvert_YpCbCrToARGB_GenerateConversion(
+                kvImage_YpCbCrToARGBMatrix_ITU_R_601_4,
+                &pixelRange,
+                &info,
+                kvImage420Yp8_CbCr8, kvImageARGB8888,
+                flags
+            );
+            
+            if (kvImageNoError != error)
+                return false;
+
+            infoGenerated = true;
+        }
+    }
+
+    static const uint8_t permuteMapBGRA [4] { 3, 2, 1, 0 };
+
+    error = vImageConvert_420Yp8_CbCr8ToARGB8888(
+        &yBuffer,
+        &cbCrBuffer,
+        &rgbaBuffer,
+        &info,
+        permuteMapBGRA,
+        255,
+        kvImageNoFlags | kvImageDoNotTile // Disable multithreading.
+    );
+
+    return kvImageNoError == error;
+}
+
+} // namespace
 
 //------------------------------------------------------------------------------
 
@@ -153,12 +153,12 @@ struct AppStatus
 
     UIImageView *_depthImageView;
 //    UIImageView *_normalsImageView;
-//    UIImageView *_colorImageView;
+    UIImageView *_colorImageView;
     
     uint16_t *_linearizeBuffer;
     uint8_t *_coloredDepthBuffer;
 //    uint8_t *_normalsBuffer;
-//    uint8_t *_colorImageBuffer;
+    uint8_t *_colorImageBuffer;
 
 //    STNormalEstimator *_normalsEstimator;
     
@@ -209,7 +209,7 @@ struct AppStatus
     _linearizeBuffer = NULL;
 //    _coloredDepthBuffer = NULL;
 //    _normalsBuffer = NULL;
-//    _colorImageBuffer = NULL;
+    _colorImageBuffer = NULL;
 
     _depthImageView = [[UIImageView alloc] initWithFrame:depthFrame];
     _depthImageView.contentMode = UIViewContentModeScaleAspectFit;
@@ -255,7 +255,7 @@ struct AppStatus
     free(_linearizeBuffer);
     free(_coloredDepthBuffer);
 //    free(_normalsBuffer);
-//    free(_colorImageBuffer);
+    free(_colorImageBuffer);
 }
 
 - (void)viewDidAppear:(BOOL)animated
@@ -559,7 +559,7 @@ struct AppStatus
 {
     [self renderDepthFrame:depthFrame];
 //    [self renderNormalsFrame:depthFrame];
-//    [self renderColorFrame:colorFrame.sampleBuffer];
+    [self renderColorFrame:colorFrame.sampleBuffer];
 }
 
 //------------------------------------------------------------------------------
@@ -688,7 +688,7 @@ const uint16_t maxShiftValue = 2048;
 //    _depthImageView.image = [UIImage imageWithCGImage:imageRef];
     
     // Find geometrically interesting points
-    _depthImageView.image = [self findInterstPoints:[UIImage imageWithCGImage:imageRef]];
+    _depthImageView.image = [self findInterestEdges:[UIImage imageWithCGImage:imageRef]];
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
@@ -745,75 +745,80 @@ const uint16_t maxShiftValue = 2048;
 //    CGColorSpaceRelease(colorSpace);
 //}
 
-//- (void)renderColorFrame:(CMSampleBufferRef)yCbCrSampleBuffer
-//{
-//    
-//    CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(yCbCrSampleBuffer);
-//    
-//    // get image size
-//    size_t cols = CVPixelBufferGetWidth(pixelBuffer);
-//    size_t rows = CVPixelBufferGetHeight(pixelBuffer);
-//    
-//    // allocate memory for RGBA image for the first time
-//    if(_colorImageBuffer==NULL)
-//        _colorImageBuffer = (uint8_t*)malloc(cols * rows * 4);
-//    
-//    // color space
-//    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-//    
-//    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
-//    
-//    // get y plane
-//    const uint8_t* yData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
-//    
-//    // get cbCr plane
-//    const uint8_t* cbCrData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
-//    
-//    size_t yBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
-//    size_t cbcrBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
-//    assert( yBytePerRow==cbcrBytePerRow );
-//
-//    uint8_t* bgra = _colorImageBuffer;
-//    
-//    bool ok = convertYCbCrToBGRA(cols, rows, yData, cbCrData, bgra, 0xff, yBytePerRow, cbcrBytePerRow, 4 * cols);
-//
-//    if (!ok)
-//    {
-//        NSLog(@"YCbCr to BGRA conversion failed.");
-//        return;
-//    }
-//
-//    NSData *data = [[NSData alloc] initWithBytes:_colorImageBuffer length:rows*cols*4];
-//    
-//    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
-//    
-//    CGBitmapInfo bitmapInfo;
-//    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipFirst;
-//    bitmapInfo |= kCGBitmapByteOrder32Little;
-//    
-//    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
-//    
-//    CGImageRef imageRef = CGImageCreate(
-//        cols,
-//        rows,
-//        8,
-//        8 * 4,
-//        cols*4,
-//        colorSpace,
-//        bitmapInfo,
-//        provider,
-//        NULL,
-//        false,
-//        kCGRenderingIntentDefault
-//    );
-//    
+- (void)renderColorFrame:(CMSampleBufferRef)yCbCrSampleBuffer
+{
+    
+    CVImageBufferRef pixelBuffer = CMSampleBufferGetImageBuffer(yCbCrSampleBuffer);
+    
+    // get image size
+    size_t cols = CVPixelBufferGetWidth(pixelBuffer);
+    size_t rows = CVPixelBufferGetHeight(pixelBuffer);
+    
+    // allocate memory for RGBA image for the first time
+    if(_colorImageBuffer==NULL)
+        _colorImageBuffer = (uint8_t*)malloc(cols * rows * 4);
+    
+    // color space
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    
+    CVPixelBufferLockBaseAddress(pixelBuffer, 0);
+    
+    // get y plane
+    const uint8_t* yData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 0));
+    
+    // get cbCr plane
+    const uint8_t* cbCrData = reinterpret_cast<uint8_t*> (CVPixelBufferGetBaseAddressOfPlane(pixelBuffer, 1));
+    
+    size_t yBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 0);
+    size_t cbcrBytePerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer, 1);
+    assert( yBytePerRow==cbcrBytePerRow );
+
+    uint8_t* bgra = _colorImageBuffer;
+    
+    bool ok = convertYCbCrToBGRA(cols, rows, yData, cbCrData, bgra, 0xff, yBytePerRow, cbcrBytePerRow, 4 * cols);
+
+    if (!ok)
+    {
+        NSLog(@"YCbCr to BGRA conversion failed.");
+        return;
+    }
+
+    NSData *data = [[NSData alloc] initWithBytes:_colorImageBuffer length:rows*cols*4];
+    
+    CVPixelBufferUnlockBaseAddress(pixelBuffer, 0);
+    
+    CGBitmapInfo bitmapInfo;
+    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipFirst;
+    bitmapInfo |= kCGBitmapByteOrder32Little;
+    
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
+    
+    CGImageRef imageRef = CGImageCreate(
+        cols,
+        rows,
+        8,
+        8 * 4,
+        cols*4,
+        colorSpace,
+        bitmapInfo,
+        provider,
+        NULL,
+        false,
+        kCGRenderingIntentDefault
+    );
+    
 //    _colorImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
-//    
-//    CGImageRelease(imageRef);
-//    CGDataProviderRelease(provider);
-//    CGColorSpaceRelease(colorSpace);
-//}
-//
+//    _depthImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
+    // Find geometrically interesting points
+//    _depthImageView.image = [self findInterstPoints:[UIImage imageWithCGImage:imageRef]];
+
+//    std::cout <<"rendering color to depthImageView" << std::endl;
+  
+    CGImageRelease(imageRef);
+    CGDataProviderRelease(provider);
+    CGColorSpaceRelease(colorSpace);
+}
+
 //------------------------------------------------------------------------------
 
 #pragma mark -  AVFoundation
@@ -1144,7 +1149,7 @@ const uint16_t maxShiftValue = 2048;
 }
 
 - (UIImage *) findInterstPoints: (UIImage *)depthImage {
-    // TODO YI: run harris corner detector
+    // Harris corner detector
     cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
     cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
     cv::Mat dst, dst_norm, dst_norm_scaled;
@@ -1164,18 +1169,43 @@ const uint16_t maxShiftValue = 2048;
 //    cv::convertScaleAbs( dst_norm, dst_norm_scaled );
     
     /// Drawing a circle around corners
-    for( int j = 0; j < dst_norm.rows ; j++ )
-    { for( int i = 0; i < dst_norm.cols; i++ )
-    {
-        if( (int) dst_norm.at<float>(j,i) > thresh )
-        {
-            cv::circle( cvImage, cv::Point( i, j ), 5,  cv::Scalar(255, 0, 0), 2, 8, 0 );
+    for( int j = 0; j < dst_norm.rows ; j++ ){
+        for( int i = 0; i < dst_norm.cols; i++ ){
+            if( (int) dst_norm.at<float>(j,i) > thresh ){
+                cv::circle( cvImage, cv::Point( i, j ), 5,  cv::Scalar(255, 0, 0), 2, 8, 0 );
+            }
         }
-    }
     }
     
     return [self UIImageFromCVMat:cvImage];
 
+}
+
+- (UIImage *)findInterestEdges: (UIImage *)depthImage {
+    
+    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+    cv::Mat dst, cdst;
+    cv::Canny(cvImage, dst, 50, 200, 3);
+    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
+    
+    vector<cv::Vec2f> lines;
+    cv::HoughLines(dst, lines, 1, CV_PI/180, 75, 0, 0 );
+    
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        float rho = lines[i][0], theta = lines[i][1];
+        cv::Point pt1, pt2;
+        double a = cos(theta), b = sin(theta);
+        double x0 = a*rho, y0 = b*rho;
+        pt1.x = cvRound(x0 + 1000*(-b));
+        pt1.y = cvRound(y0 + 1000*(a));
+        pt2.x = cvRound(x0 - 1000*(-b));
+        pt2.y = cvRound(y0 - 1000*(a));
+//        cv::line( cvImage, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
+        cv::line( cdst, pt1, pt2, cv::Scalar(0,0,255), 1, CV_AA);
+
+    }
+    return [self UIImageFromCVMat:cdst];
 }
 
 //---------------- Provided functions from class ------------------

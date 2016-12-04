@@ -678,7 +678,7 @@ const uint16_t maxShiftValue = 2048;
 //    _depthImageView.image = [UIImage imageWithCGImage:imageRef];
     
     // Find geometrically interesting points
-//    _depthImageView.image = [self findInterstPoints:[UIImage imageWithCGImage:imageRef]];
+    _depthImageView.image = [self findInterestEdges:[UIImage imageWithCGImage:imageRef]];
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
@@ -800,9 +800,9 @@ const uint16_t maxShiftValue = 2048;
 //    _colorImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
 //    _depthImageView.image = [[UIImage alloc] initWithCGImage:imageRef];
     // Find geometrically interesting points
-    _depthImageView.image = [self findInterstPoints:[UIImage imageWithCGImage:imageRef]];
+//    _depthImageView.image = [self findInterstPoints:[UIImage imageWithCGImage:imageRef]];
 
-    std::cout <<"rendering color to depthImageView" << std::endl;
+//    std::cout <<"rendering color to depthImageView" << std::endl;
   
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
@@ -1160,6 +1160,34 @@ const uint16_t maxShiftValue = 2048;
     
     return [self UIImageFromCVMat:cvImage];
 
+}
+
+- (UIImage *)findInterestEdges: (UIImage *)depthImage {
+    
+    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+//    cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
+//    cv::Mat dst, dst_norm, dst_norm_scaled;
+//    dst = cv::Mat::zeros( gray.size(), CV_32FC1 );
+    cv::Mat dst, cdst;
+    cv::Canny(cvImage, dst, 50, 200, 3);
+//    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
+    
+    vector<cv::Vec2f> lines;
+    cv::HoughLines(dst, lines, 1, CV_PI/180, 100, 0, 0 );
+    
+    for( size_t i = 0; i < lines.size(); i++ )
+    {
+        float rho = lines[i][0], theta = lines[i][1];
+        cv::Point pt1, pt2;
+        double a = cos(theta), b = sin(theta);
+        double x0 = a*rho, y0 = b*rho;
+        pt1.x = cvRound(x0 + 1000*(-b));
+        pt1.y = cvRound(y0 + 1000*(a));
+        pt2.x = cvRound(x0 - 1000*(-b));
+        pt2.y = cvRound(y0 - 1000*(a));
+        cv::line( cvImage, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
+    }
+    return [self UIImageFromCVMat:cvImage];
 }
 
 //---------------- Provided functions from class ------------------

@@ -175,6 +175,7 @@ struct AppStatus
     UIImageView *_selectionView; // show selected points for measurements
     int halfSquare;
     UITextView *coordView_; // For deubgging
+    UITextView *distanceView_;
 
 }
 
@@ -237,6 +238,15 @@ struct AppStatus
     [coordView_ setFont:[UIFont systemFontOfSize:18]]; // Set the Font size
     [self.view addSubview:coordView_];
     [self.view bringSubviewToFront:coordView_] ;
+    
+    distanceView_ = [[UITextView alloc] initWithFrame:CGRectMake(0,50,self.view.frame.size.width,35)];
+    [distanceView_ setOpaque:false];
+    [distanceView_ setBackgroundColor:[UIColor clearColor]]; // Set background color to be clear
+    [distanceView_ setTextColor:[UIColor lightGrayColor]]; // Set text to be RED
+    [distanceView_ setFont:[UIFont systemFontOfSize:18]]; // Set the Font size
+    [distanceView_ setHidden:true];
+    [self.view addSubview:distanceView_];
+    [self.view bringSubviewToFront:distanceView_] ;
 
 }
 
@@ -1084,41 +1094,50 @@ const uint16_t maxShiftValue = 2048;
     float _cx = QVGA_C_X/QVGA_COLS*depthFrame.width;
     float _cy = QVGA_C_Y/QVGA_ROWS*depthFrame.height;
     
-    int centerC=depthFrame.width/2, centerR=depthFrame.height/2;
-    int imgC=1024/2, imgR=768/2;
-    int pointIndex = centerR*depthFrame.width+centerC;
-    float depth=depthFrame.depthInMillimeters[pointIndex];
-    float x=depth * (imgC - _cx) / _fx;
-    float y=depth * (_cy - imgR) / _fy;
-    float z=depth;
-    std::cout << "3D pt1: (" << x << "," << y << "," << z << ")" << std::endl;
+//    std::cout <<depthFrame.width << " " << depthFrame.height << std::endl;
     
-//    int r1=measureCoords[1]/3.2, c1=measureCoords[0]/3.2;
-//    int pointIndex1 = r1*depthFrame.width + c1;
-//    std::cout << "point1 coord: " << r1 << " " << c1 << std::endl;
-//
-////    NSLog(@"Pt1 shift: %d depth: %f", depthFrame.shiftData[pointIndex1], depthFrame.depthInMillimeters[pointIndex1]);
-//    
-//    float depth1=depthFrame.depthInMillimeters[pointIndex1];
-//    float x1=depth1 * (measureCoords[0] - _cx) / _fx;
-//    float y1=depth1 * (_cy - measureCoords[1]) / _fy;
-//    float z1=depth1;
+    // center distance debug
+//    int centerC=depthFrame.width/2, centerR=depthFrame.height/2;
+//    int imgC=1024/2, imgR=768/2;
+//    int pointIndex = centerR*depthFrame.width+centerC;
+//    float depth=depthFrame.depthInMillimeters[pointIndex];
+//    float x=depth * (imgC - _cx) / _fx;
+//    float y=depth * (_cy - imgR) / _fy;
+//    float z=depth;
+//    std::cout << "3D pt1: (" << x << "," << y << "," << z << ")" << std::endl;
+//    std::cout << "measure Coords: " << measureCoords[0] << " " << measureCoords[1] << " " << measureCoords[2] << " " << measureCoords[3] << std::endl;
+    
+    int r1=measureCoords[1]/3.2, c1=measureCoords[0]/3.2;
+    int pointIndex1 = r1*depthFrame.width + c1;
+//    std::cout << "point1 coord: " << c1 << " " << r1 << std::endl;
+
+//    NSLog(@"Pt1 shift: %d depth: %f", depthFrame.shiftData[pointIndex1], depthFrame.depthInMillimeters[pointIndex1]);
+    
+    float depth1=depthFrame.depthInMillimeters[pointIndex1];
+    float x1=depth1 * (c1 - _cx) / _fx;
+    float y1=depth1 * (_cy - r1) / _fy;
+    float z1=depth1;
 //    std::cout << "3D pt1: (" << x1 << "," << y1<< "," << z1 << ")" << std::endl;
-//
-//    
-//    int r2=measureCoords[3]/3.2, c2=measureCoords[2]/3.2;
-//    int pointIndex2 = r2*depthFrame.width + c2;
-//    std::cout << "point2 coord: " << r2 << " " << c2 << std::endl;
-//
-//    
-//    float depth2=depthFrame.depthInMillimeters[pointIndex2];
-//    float x2=depth2 * (measureCoords[2] - _cx) / _fx;
-//    float y2=depth2 * (_cy - measureCoords[3]) / _fy;
-//    float z2=depth2;
+
+    
+    int r2=measureCoords[3]/3.2, c2=measureCoords[2]/3.2;
+    int pointIndex2 = r2*depthFrame.width + c2;
+//    std::cout << "point2 coord: " << c2 << " " << r2 << std::endl;
+
+    
+    float depth2=depthFrame.depthInMillimeters[pointIndex2];
+    float x2=depth2 * (c2 - _cx) / _fx;
+    float y2=depth2 * (_cy - r2) / _fy;
+    float z2=depth2;
 //    std::cout << "3D pt2: (" << x2 << "," << y2<< "," << z2 << ")" << std::endl;
-//    
-//    
-////    NSLog(@"Central shift: %d depth: %f", depthFrame.shiftData[160*340+120], depthFrame.depthInMillimeters[160*340+120]);
+    
+    float dist= sqrt(pow(x2-x1,2)+pow(y2-y1,2)+pow(z2-z1,2));
+    std::cout << "distance: " << dist/10.0 << std::endl;
+    NSString *distance_NSStr = [NSString stringWithFormat:@"Distance: %2.2f", dist/10.0];
+    distanceView_.text = distance_NSStr;
+    [distanceView_ setHidden:false];
+    
+//    NSLog(@"Central shift: %d depth: %f", depthFrame.shiftData[160*340+120], depthFrame.depthInMillimeters[160*340+120]);
     
 
     

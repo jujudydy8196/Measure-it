@@ -1165,15 +1165,12 @@ const uint16_t maxShiftValue = 2048;
 - (UIImage *)findInterestEdges: (UIImage *)depthImage {
     
     cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
-//    cv::Mat gray; cv::cvtColor(cvImage, gray, CV_RGBA2GRAY); // Convert to grayscale
-//    cv::Mat dst, dst_norm, dst_norm_scaled;
-//    dst = cv::Mat::zeros( gray.size(), CV_32FC1 );
     cv::Mat dst, cdst;
     cv::Canny(cvImage, dst, 50, 200, 3);
-//    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
+    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
     
     vector<cv::Vec2f> lines;
-    cv::HoughLines(dst, lines, 1, CV_PI/180, 100, 0, 0 );
+    cv::HoughLines(dst, lines, 1, CV_PI/180, 75, 0, 0 );
     
     for( size_t i = 0; i < lines.size(); i++ )
     {
@@ -1185,9 +1182,11 @@ const uint16_t maxShiftValue = 2048;
         pt1.y = cvRound(y0 + 1000*(a));
         pt2.x = cvRound(x0 - 1000*(-b));
         pt2.y = cvRound(y0 - 1000*(a));
-        cv::line( cvImage, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
+//        cv::line( cvImage, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
+        cv::line( cdst, pt1, pt2, cv::Scalar(0,0,255), 1, CV_AA);
+
     }
-    return [self UIImageFromCVMat:cvImage];
+    return [self UIImageFromCVMat:cdst];
 }
 
 //---------------- Provided functions from class ------------------

@@ -229,7 +229,7 @@ struct AppStatus
     _selectionView = [[UIImageView alloc] initWithFrame:depthFrame];
     [_selectionView setOpaque:false];
     [self.view addSubview:_selectionView];
-    halfSquare = 25;
+    halfSquare = 15;
 
     coordView_ = [[UITextView alloc] initWithFrame:CGRectMake(0,15,self.view.frame.size.width,35)];
     [coordView_ setOpaque:false];
@@ -1029,20 +1029,32 @@ const uint16_t maxShiftValue = 2048;
                              currentPoint.x, currentPoint.y];
     coordView_.text = coord_NSStr;
     
+
+    
+    
     // Yi: draw square around current selections
     UIGraphicsBeginImageContextWithOptions(_selectionView.frame.size, false, 1.0f);
     CGContextRef context = UIGraphicsGetCurrentContext();
     CGRect selectedRect = CGRectMake(currentPoint.x - halfSquare, currentPoint.y - halfSquare,
                                      halfSquare*2, halfSquare*2);
     CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
-    CGContextStrokeRect(context, selectedRect);
+    CGContextSetLineWidth(context, 2.0);
+    CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+    CGContextFillEllipseInRect(context, selectedRect);
+    CGContextFillPath(context);
+    
+//    CGContextStrokeRect(context, selectedRect);
     
     if (!measurePtCursor) {
         std::cout << "add another in touch begin" << std::endl;
         CGRect prevRect = CGRectMake(measureCoords[0] - halfSquare, measureCoords[1] - halfSquare,
                                      halfSquare*2, halfSquare*2);
         CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
-        CGContextStrokeRect(context, prevRect);
+        CGContextSetLineWidth(context, 2.0);
+        CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+        CGContextFillEllipseInRect(context, prevRect);
+        CGContextFillPath(context);
+//        CGContextStrokeRect(context, prevRect);
     }
     
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
@@ -1064,13 +1076,21 @@ const uint16_t maxShiftValue = 2048;
     CGRect selectedRect = CGRectMake(currentPoint.x - halfSquare, currentPoint.y - halfSquare,
                                     halfSquare*2, halfSquare*2);
     CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
-    CGContextStrokeRect(context, selectedRect);
+    CGContextSetLineWidth(context, 2.0);
+    CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+    CGContextFillEllipseInRect(context, selectedRect);
+    CGContextFillPath(context);
+//    CGContextStrokeRect(context, selectedRect);
     if (measurePtCursor) {
         std::cout << "add another in touch move" << std::endl;
         CGRect prevRect = CGRectMake(measureCoords[0] - halfSquare, measureCoords[1] - halfSquare,
                                      halfSquare*2, halfSquare*2);
         CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
-        CGContextStrokeRect(context, prevRect);
+        CGContextSetLineWidth(context, 2.0);
+        CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+        CGContextFillEllipseInRect(context, prevRect);
+        CGContextFillPath(context);
+//        CGContextStrokeRect(context, prevRect);
         CGContextSetLineWidth(context,3.0f);
         /* Start the line at this point */
         CGContextMoveToPoint(context,measureCoords[0], measureCoords[1]);
@@ -1102,14 +1122,23 @@ const uint16_t maxShiftValue = 2048;
     CGRect selectedRect = CGRectMake(currentPoint.x - halfSquare, currentPoint.y - halfSquare,
                                      halfSquare*2, halfSquare*2);
     CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
-    CGContextStrokeRect(context, selectedRect);
+    CGContextSetLineWidth(context, 2.0);
+    CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+    CGContextFillEllipseInRect(context, selectedRect);
+    CGContextFillPath(context);
+//    CGContextStrokeRect(context, selectedRect);
     
     if (!measurePtCursor) {
         std::cout << "add another in touch end" << std::endl;
         CGRect prevRect = CGRectMake(measureCoords[0] - halfSquare, measureCoords[1] - halfSquare,
                                      halfSquare*2, halfSquare*2);
         CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
-        CGContextStrokeRect(context, prevRect);
+        CGContextSetLineWidth(context, 2.0);
+        CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+        CGContextFillEllipseInRect(context, prevRect);
+        CGContextFillPath(context);
+//        CGContextStrokeRect(context, prevRect);
+        
         CGContextSetLineWidth(context,3.0f);
         /* Start the line at this point */
         CGContextMoveToPoint(context,measureCoords[0], measureCoords[1]);

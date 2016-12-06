@@ -21,8 +21,8 @@
     if (!_display.context) { NSLog(@"Failed to create ES context"); return; }
     
     [EAGLContext setCurrentContext:_display.context];
-    [(EAGLView*)self.view setContext:_display.context];
-    [(EAGLView*)self.view setFramebuffer];
+//    [(EAGLView*)self.view setContext:_display.context];
+//    [(EAGLView*)self.view setFramebuffer];
     
     _display.yCbCrTextureShader = [[STGLTextureShaderYCbCr alloc] init];
     _display.rgbaTextureShader = [[STGLTextureShaderRGBA alloc] init];

@@ -16,6 +16,7 @@
 #import "CustomUIKitStyles.h"
 
 #include <cmath>
+#include <iostream>
 
 @implementation ViewController
 
@@ -39,7 +40,7 @@
     
     [self setupUserInterface];
     
-    [self setupMeshViewController];
+//    [self setupMeshViewController];
     
     [self setupIMU];
     
@@ -123,13 +124,13 @@
     return YES;
 }
 
-- (void)setupMeshViewController
-{
-    // The mesh viewer will be used after scanning.
-    _meshViewController = [[MeshViewController alloc] initWithNibName:@"MeshView" bundle:nil];
-    _meshViewController.delegate = self;
-    _meshViewNavigationController = [[UINavigationController alloc] initWithRootViewController:_meshViewController];
-}
+//- (void)setupMeshViewController
+//{
+//    // The mesh viewer will be used after scanning.
+//    _meshViewController = [[MeshViewController alloc] initWithNibName:@"MeshView" bundle:nil];
+//    _meshViewController.delegate = self;
+//    _meshViewNavigationController = [[UINavigationController alloc] initWithRootViewController:_meshViewController];
+//}
 
 - (void)enterPoseInitializationState
 {
@@ -195,42 +196,42 @@
     _slamState.roomCaptureState = RoomCaptureStateFinalizing;
     
     // Colorize the mesh in a background queue.
-    [self colorizeMeshInBackground];
+//    [self colorizeMeshInBackground];
 }
 
-- (void)colorizeMeshInBackground
-{
-    // Take a copy of the scene mesh to safely modify it.
-    _colorizedMesh = [[STMesh alloc] initWithMesh:[_slamState.scene lockAndGetSceneMesh]];
-    [_slamState.scene unlockSceneMesh];
-    
-    _appStatus.backgroundProcessingStatus = AppStatus::BackgroundProcessingStatusFinalizing;
-    [self updateAppStatusMessage];
-    
-    STBackgroundTask* colorizeTask = [STColorizer
-                                      newColorizeTaskWithMesh:_colorizedMesh
-                                      scene:_slamState.scene
-                                      keyframes:[_slamState.keyFrameManager getKeyFrames]
-                                      completionHandler: ^(NSError *error)
-                                      {
-                                          if (error != nil) {
-                                              NSLog(@"Error during colorizing: %@", [error localizedDescription]);
-                                          }
-                                          
-                                          dispatch_async(dispatch_get_main_queue(), ^{
-                                              
-                                              _appStatus.backgroundProcessingStatus = AppStatus::BackgroundProcessingStatusIdle;
-                                              _appStatus.statusMessageDisabled = true;
-                                              [self updateAppStatusMessage];
-                                              
-                                              [self enterViewingState];
-                                          });
-                                      }
-                                      options:@{kSTColorizerTypeKey: @(STColorizerTextureMapForRoom) }
-                                      error:nil];
-    
-    [colorizeTask start];
-}
+//- (void)colorizeMeshInBackground
+//{
+//    // Take a copy of the scene mesh to safely modify it.
+//    _colorizedMesh = [[STMesh alloc] initWithMesh:[_slamState.scene lockAndGetSceneMesh]];
+//    [_slamState.scene unlockSceneMesh];
+//    
+//    _appStatus.backgroundProcessingStatus = AppStatus::BackgroundProcessingStatusFinalizing;
+//    [self updateAppStatusMessage];
+//    
+//    STBackgroundTask* colorizeTask = [STColorizer
+//                                      newColorizeTaskWithMesh:_colorizedMesh
+//                                      scene:_slamState.scene
+//                                      keyframes:[_slamState.keyFrameManager getKeyFrames]
+//                                      completionHandler: ^(NSError *error)
+//                                      {
+//                                          if (error != nil) {
+//                                              NSLog(@"Error during colorizing: %@", [error localizedDescription]);
+//                                          }
+//                                          
+//                                          dispatch_async(dispatch_get_main_queue(), ^{
+//                                              
+//                                              _appStatus.backgroundProcessingStatus = AppStatus::BackgroundProcessingStatusIdle;
+//                                              _appStatus.statusMessageDisabled = true;
+//                                              [self updateAppStatusMessage];
+//                                              
+//                                              [self enterViewingState];
+//                                          });
+//                                      }
+//                                      options:@{kSTColorizerTypeKey: @(STColorizerTextureMapForRoom) }
+//                                      error:nil];
+//    
+//    [colorizeTask start];
+//}
 
 - (void)enterViewingState
 {
@@ -238,8 +239,8 @@
     GLKVector3 cameraCenter = GLKVector3MultiplyScalar(_slamState.cameraPoseInitializer.volumeSizeInMeters, 0.5);
     GLKMatrix4 initialCameraPose = GLKMatrix4MakeTranslation(cameraCenter.x, cameraCenter.y, cameraCenter.z);
     
-    [self presentMeshViewer:_colorizedMesh withCameraPose:initialCameraPose];
-    
+//    [self presentMeshViewer:_colorizedMesh withCameraPose:initialCameraPose];
+    std::cout << "enter Viewing State!!!" << std::endl;
     _slamState.roomCaptureState = RoomCaptureStateViewing;
     
     [self updateIdleTimer];
@@ -307,6 +308,20 @@
     {
         // The tracker is more robust to fast moves if we feed it with motion data.
         [_slamState.tracker updateCameraPoseWithMotion:motion];
+        
+        // TODO:YI
+        GLKMatrix4 lastPose = _slamState.tracker.lastFrameCameraPose;
+//        NSLog(@"last pose:");
+//        NSLog(@"    %f %f %f %f",lastPose.m00,lastPose.m01,lastPose.m02,lastPose.m03);
+//        NSLog(@"    %f %f %f %f",lastPose.m10,lastPose.m11,lastPose.m12,lastPose.m13);
+//        NSLog(@"    %f %f %f %f",lastPose.m20,lastPose.m21,lastPose.m22,lastPose.m23);
+//        NSLog(@"    %f %f %f %f",lastPose.m30,lastPose.m31,lastPose.m32,lastPose.m33);
+        
+        std::cout << "last pose:" << std::endl;
+        std::cout << lastPose.m00 << "," << lastPose.m01 << "," << lastPose.m02 << "," <<lastPose.m03 << std::endl;
+        std::cout << lastPose.m10 << "," << lastPose.m11 << "," << lastPose.m12 << "," <<lastPose.m13 << std::endl;
+        std::cout << lastPose.m20 << "," << lastPose.m21 << "," << lastPose.m22 << "," <<lastPose.m23 << std::endl;
+        std::cout << lastPose.m30 << "," << lastPose.m31 << "," << lastPose.m32 << "," <<lastPose.m33 << std::endl;
     }
 }
 
@@ -503,166 +518,166 @@
     self.roomSizeLabel.hidden = YES;
 }
 
-#pragma mark - MeshViewController delegates
-
-- (void)presentMeshViewer:(STMesh *)mesh withCameraPose:(GLKMatrix4)cameraPose
-{
-    [(EAGLView *)_meshViewController.view setContext:_display.context];
-    [EAGLContext setCurrentContext:_display.context];
-    
-    // Horizontal field of view.
-    float fovXRadians = 90.f/180.f * M_PI;
-    float aspectRatio = 4.f/3.f;
-    
-    if (mesh)
-    {
-        [_meshViewController uploadMesh:mesh];
-    }
-    else
-    {
-        NSLog(@"Error: no mesh!");
-    }
-    [_meshViewController setHorizontalFieldOfView:fovXRadians aspectRatio:aspectRatio];
-    [_meshViewController setCameraPose:cameraPose];
-    
-    [self presentViewController:_meshViewNavigationController animated:YES completion:^{}];
-}
-
-- (void)meshViewWillDismiss
-{
-    [_meshViewController hideMeshViewerMessage:_meshViewController.meshViewerMessageLabel];
-    
-    // Make sure we don't keep background task running.
-    if (_holeFillingTask)
-    {
-        [_holeFillingTask cancel];
-        _holeFillingTask = nil;
-    }
-    if (_colorizeTask)
-    {
-        [_colorizeTask cancel];
-        _colorizeTask = nil;
-    }
-}
-
-- (void)meshViewDidDismiss
-{
-    // Restart the sensor.
-    [self connectToStructureSensorAndStartStreaming];
-    
-    _appStatus.statusMessageDisabled = false;
-    [self updateAppStatusMessage];
-    
-    // Reset the tracker, mapper, etc.
-    [self resetSLAM];
-    [self enterPoseInitializationState];
-}
-
-- (void)meshViewDidRequestHoleFilling
-{
-    if (_holeFilledMesh)
-    {
-        // If already available, just re-upload it.
-        [_meshViewController uploadMesh:_holeFilledMesh];
-    }
-    else
-    {
-        // Otherwise compute it now.
-        [_meshViewController.holeFillingSwitch setEnabled:NO];
-        [self startHoleFillingAndColorizingTasks];
-    }
-}
-
-- (void)meshViewDidRequestRegularMesh
-{
-    [_meshViewController uploadMesh:_colorizedMesh];
-}
-
--(void) backgroundTask:(STBackgroundTask*)sender didUpdateProgress:(double)progress
-{
-    if(sender == _holeFillingTask)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [_meshViewController showMeshViewerMessage:_meshViewController.meshViewerMessageLabel msg:[NSString stringWithFormat:@"Hole filling: % 3d%%", int(progress*80)]];
-        });
-    }
-    else if(sender == _colorizeTask)
-    {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [_meshViewController showMeshViewerMessage:_meshViewController.meshViewerMessageLabel msg:[NSString stringWithFormat:@"Coloring Mesh: % 3d%%", int(progress*20)+80]];
-        });
-    }
-}
-
-
-- (void)startHoleFillingAndColorizingTasks
-{
-    // Safely copy the scene mesh so we can operate on it while it is being used for rendering.
-    STMesh* sceneMesh = [_slamState.scene lockAndGetSceneMesh];
-    STMesh* sceneMeshCopy = [[STMesh alloc] initWithMesh:sceneMesh];
-    [_slamState.scene unlockSceneMesh];
-    
-    // If an old task is still running, wait until it completes.
-    if (_holeFillingTask)
-    {
-        [_holeFillingTask waitUntilCompletion];
-        _holeFillingTask = nil;
-    }
-    
-    STBackgroundTask* holeFillingTask = [STMesh newFillHolesTaskWithMesh:sceneMeshCopy completionHandler:^(STMesh* result, NSError *error) {
-        
-        // We must execute on main thread to check if the operation was canceled right before completion.
-        dispatch_async(dispatch_get_main_queue(), ^{
-            
-            _holeFilledMesh = result;
-            
-            if (_holeFillingTask.isCancelled)
-            {
-                // If we reach this point, it means the task was cancelled after we already had the result ready.
-                NSLog(@"Error! %s", [[error localizedDescription] UTF8String]);
-                return;
-            }
-            
-            // Release the handle on the completed task.
-            _holeFillingTask = nil;
-            
-            // Now colorize the hole filled mesh.
-            STBackgroundTask* colorizeTask = [STColorizer
-                                              newColorizeTaskWithMesh:_holeFilledMesh
-                                              scene:_slamState.scene
-                                              keyframes:[_slamState.keyFrameManager getKeyFrames]
-                                              completionHandler:^(NSError *error)
-                                              {
-                                                  if (error == nil)
-                                                  {
-                                                      [self performSelectorOnMainThread:@selector(holeFillingDone) withObject:nil waitUntilDone:NO];
-                                                  }
-                                                  else
-                                                  {
-                                                      NSLog(@"Error! %s", [[error localizedDescription] UTF8String]);
-                                                  }
-                                                  
-                                                  _colorizeTask = nil; // release the handle on the completed task.
-                                              }
-                                              options:@{kSTColorizerTypeKey: @(STColorizerTextureMapForRoom) }
-                                              error:nil];
-            _colorizeTask = colorizeTask;
-            _colorizeTask.delegate = self;
-            [_colorizeTask start];
-        });
-    }];
-    
-    // Keep a reference so we can monitor progress
-    _holeFillingTask = holeFillingTask;
-    _holeFillingTask.delegate = self;
-    
-    [_holeFillingTask start];
-}
-
-- (void)holeFillingDone
-{
-    [_meshViewController uploadMesh:_holeFilledMesh];
-    [_meshViewController hideMeshViewerMessage:_meshViewController.meshViewerMessageLabel];
-    [_meshViewController.holeFillingSwitch setEnabled:YES];
-}
+//#pragma mark - MeshViewController delegates
+//
+//- (void)presentMeshViewer:(STMesh *)mesh withCameraPose:(GLKMatrix4)cameraPose
+//{
+//    [(EAGLView *)_meshViewController.view setContext:_display.context];
+//    [EAGLContext setCurrentContext:_display.context];
+//    
+//    // Horizontal field of view.
+//    float fovXRadians = 90.f/180.f * M_PI;
+//    float aspectRatio = 4.f/3.f;
+//    
+//    if (mesh)
+//    {
+//        [_meshViewController uploadMesh:mesh];
+//    }
+//    else
+//    {
+//        NSLog(@"Error: no mesh!");
+//    }
+//    [_meshViewController setHorizontalFieldOfView:fovXRadians aspectRatio:aspectRatio];
+//    [_meshViewController setCameraPose:cameraPose];
+//    
+//    [self presentViewController:_meshViewNavigationController animated:YES completion:^{}];
+//}
+//
+//- (void)meshViewWillDismiss
+//{
+//    [_meshViewController hideMeshViewerMessage:_meshViewController.meshViewerMessageLabel];
+//    
+//    // Make sure we don't keep background task running.
+//    if (_holeFillingTask)
+//    {
+//        [_holeFillingTask cancel];
+//        _holeFillingTask = nil;
+//    }
+//    if (_colorizeTask)
+//    {
+//        [_colorizeTask cancel];
+//        _colorizeTask = nil;
+//    }
+//}
+//
+//- (void)meshViewDidDismiss
+//{
+//    // Restart the sensor.
+//    [self connectToStructureSensorAndStartStreaming];
+//    
+//    _appStatus.statusMessageDisabled = false;
+//    [self updateAppStatusMessage];
+//    
+//    // Reset the tracker, mapper, etc.
+//    [self resetSLAM];
+//    [self enterPoseInitializationState];
+//}
+//
+//- (void)meshViewDidRequestHoleFilling
+//{
+//    if (_holeFilledMesh)
+//    {
+//        // If already available, just re-upload it.
+//        [_meshViewController uploadMesh:_holeFilledMesh];
+//    }
+//    else
+//    {
+//        // Otherwise compute it now.
+//        [_meshViewController.holeFillingSwitch setEnabled:NO];
+//        [self startHoleFillingAndColorizingTasks];
+//    }
+//}
+//
+//- (void)meshViewDidRequestRegularMesh
+//{
+//    [_meshViewController uploadMesh:_colorizedMesh];
+//}
+//
+//-(void) backgroundTask:(STBackgroundTask*)sender didUpdateProgress:(double)progress
+//{
+//    if(sender == _holeFillingTask)
+//    {
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            [_meshViewController showMeshViewerMessage:_meshViewController.meshViewerMessageLabel msg:[NSString stringWithFormat:@"Hole filling: % 3d%%", int(progress*80)]];
+//        });
+//    }
+//    else if(sender == _colorizeTask)
+//    {
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            [_meshViewController showMeshViewerMessage:_meshViewController.meshViewerMessageLabel msg:[NSString stringWithFormat:@"Coloring Mesh: % 3d%%", int(progress*20)+80]];
+//        });
+//    }
+//}
+//
+//
+//- (void)startHoleFillingAndColorizingTasks
+//{
+//    // Safely copy the scene mesh so we can operate on it while it is being used for rendering.
+//    STMesh* sceneMesh = [_slamState.scene lockAndGetSceneMesh];
+//    STMesh* sceneMeshCopy = [[STMesh alloc] initWithMesh:sceneMesh];
+//    [_slamState.scene unlockSceneMesh];
+//    
+//    // If an old task is still running, wait until it completes.
+//    if (_holeFillingTask)
+//    {
+//        [_holeFillingTask waitUntilCompletion];
+//        _holeFillingTask = nil;
+//    }
+//    
+//    STBackgroundTask* holeFillingTask = [STMesh newFillHolesTaskWithMesh:sceneMeshCopy completionHandler:^(STMesh* result, NSError *error) {
+//        
+//        // We must execute on main thread to check if the operation was canceled right before completion.
+//        dispatch_async(dispatch_get_main_queue(), ^{
+//            
+//            _holeFilledMesh = result;
+//            
+//            if (_holeFillingTask.isCancelled)
+//            {
+//                // If we reach this point, it means the task was cancelled after we already had the result ready.
+//                NSLog(@"Error! %s", [[error localizedDescription] UTF8String]);
+//                return;
+//            }
+//            
+//            // Release the handle on the completed task.
+//            _holeFillingTask = nil;
+//            
+//            // Now colorize the hole filled mesh.
+//            STBackgroundTask* colorizeTask = [STColorizer
+//                                              newColorizeTaskWithMesh:_holeFilledMesh
+//                                              scene:_slamState.scene
+//                                              keyframes:[_slamState.keyFrameManager getKeyFrames]
+//                                              completionHandler:^(NSError *error)
+//                                              {
+//                                                  if (error == nil)
+//                                                  {
+//                                                      [self performSelectorOnMainThread:@selector(holeFillingDone) withObject:nil waitUntilDone:NO];
+//                                                  }
+//                                                  else
+//                                                  {
+//                                                      NSLog(@"Error! %s", [[error localizedDescription] UTF8String]);
+//                                                  }
+//                                                  
+//                                                  _colorizeTask = nil; // release the handle on the completed task.
+//                                              }
+//                                              options:@{kSTColorizerTypeKey: @(STColorizerTextureMapForRoom) }
+//                                              error:nil];
+//            _colorizeTask = colorizeTask;
+//            _colorizeTask.delegate = self;
+//            [_colorizeTask start];
+//        });
+//    }];
+//    
+//    // Keep a reference so we can monitor progress
+//    _holeFillingTask = holeFillingTask;
+//    _holeFillingTask.delegate = self;
+//    
+//    [_holeFillingTask start];
+//}
+//
+//- (void)holeFillingDone
+//{
+//    [_meshViewController uploadMesh:_holeFilledMesh];
+//    [_meshViewController hideMeshViewerMessage:_meshViewController.meshViewerMessageLabel];
+//    [_meshViewController.holeFillingSwitch setEnabled:YES];
+//}
 @end

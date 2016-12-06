@@ -102,8 +102,8 @@ namespace // anonymous namespace for local functions
     [_slamState.scene clear];
     [_slamState.keyFrameManager clear];
     
-    _colorizedMesh = nil;
-    _holeFilledMesh = nil;
+//    _colorizedMesh = nil;
+//    _holeFilledMesh = nil;
 }
 
 - (void)clearSLAM

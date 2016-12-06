@@ -12,7 +12,7 @@
 #import <Structure/Structure.h>
 #import <Structure/StructureSLAM.h>
 
-#import "MeshViewController.h"
+//#import "MeshViewController.h"
 
 @interface ViewController (Sensor) <STSensorControllerDelegate>
 

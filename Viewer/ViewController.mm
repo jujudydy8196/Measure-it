@@ -179,6 +179,9 @@ struct AppStatus
     int halfSquare;
     UITextView *coordView_; // For deubgging
     UITextView *distanceView_;
+    
+    
+    vector<cv::Vec4i> lineSeg; //For houghLinesP
 
 }
 
@@ -693,8 +696,14 @@ const uint16_t maxShiftValue = 2048;
     // Find geometrically interesting points
 //    interestPoints = [self findInterstPoints:[UIImage imageWithCGImage:imageRef]];
 
-    interestPoints = [self findInterestEdges:[UIImage imageWithCGImage:imageRef]];
+//    interestPoints = [self findInterestEdges:[UIImage imageWithCGImage:imageRef]];
+    
+    // TODO: Judy
+    interestPoints = [self findInterestEdgesSeg:[UIImage imageWithCGImage:imageRef]];
+
     _depthImageView.image = interestPoints;
+    
+    
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
@@ -1124,7 +1133,7 @@ const uint16_t maxShiftValue = 2048;
 - (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
-    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
+    currentPoint = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
     
     // Alternatively update selected points
     [self updateNextPoint:currentPoint];
@@ -1225,7 +1234,7 @@ const uint16_t maxShiftValue = 2048;
 //    std::cout << "3D pt2: (" << x2 << "," << y2<< "," << z2 << ")" << std::endl;
     
     float dist= sqrt(pow(x2-x1,2)+pow(y2-y1,2)+pow(z2-z1,2));
-    std::cout << "distance: " << dist/10.0 << std::endl;
+//    std::cout << "distance: " << dist/10.0 << std::endl;
     NSString *distance_NSStr = [NSString stringWithFormat:@"Distance: %2.2f", dist/10.0];
     distanceView_.text = distance_NSStr;
     [distanceView_ setHidden:false];
@@ -1274,6 +1283,7 @@ const uint16_t maxShiftValue = 2048;
     
     // TODO Judy: find point snap to edge
     std::cout << "TODO Judy: find nearest edge within neighborhood threshold" << std::endl;
+    std::cout << "number of lines detected: "  << lineSeg.size() << std::endl;
     return selectedPoint;
 }
 
@@ -1302,6 +1312,27 @@ const uint16_t maxShiftValue = 2048;
 //        cv::line( cvImage, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
         cv::line( cvImage, pt1, pt2, cv::Scalar(0,0,255), 1, CV_AA);
 
+    }
+    return [self UIImageFromCVMat:cvImage];
+}
+
+- (UIImage *)findInterestEdgesSeg: (UIImage *)depthImage {
+    
+    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+    cv::Mat dst, cdst;
+    cv::Canny(cvImage, dst, 50, 200, 3);
+    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
+    
+//    vector<cv::Vec2f> lines;
+    cv::HoughLinesP(dst, lineSeg, 1, CV_PI/180, 75, 10, 10 );
+    
+    
+    
+    for( size_t i = 0; i < lineSeg.size(); i++ )
+    {
+        cv::line( cvImage, cv::Point(lineSeg[i][0], lineSeg[i][1]),
+                 cv::Point(lineSeg[i][2], lineSeg[i][3]), cv::Scalar(0,0,255), 3, 8 );
+        
     }
     return [self UIImageFromCVMat:cvImage];
 }

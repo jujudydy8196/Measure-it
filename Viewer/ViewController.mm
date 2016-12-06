@@ -1269,6 +1269,14 @@ const uint16_t maxShiftValue = 2048;
 
 }
 
+- (CGPoint) findInterstPointNearEdge: (CGPoint)selectedPoint within: (int)nearThresh{
+    // nearThresh defines the size of neighborhood to search for an interest point
+    
+    // TODO Judy: find point snap to edge
+    std::cout << "TODO Judy: find nearest edge within neighborhood threshold" << std::endl;
+    return selectedPoint;
+}
+
 - (UIImage *)findInterestEdges: (UIImage *)depthImage {
     
     cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
@@ -1278,6 +1286,8 @@ const uint16_t maxShiftValue = 2048;
     
     vector<cv::Vec2f> lines;
     cv::HoughLines(dst, lines, 1, CV_PI/180, 75, 0, 0 );
+    
+    
     
     for( size_t i = 0; i < lines.size(); i++ )
     {

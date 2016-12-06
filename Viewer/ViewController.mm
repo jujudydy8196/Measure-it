@@ -1284,6 +1284,7 @@ const uint16_t maxShiftValue = 2048;
     // TODO Judy: find point snap to edge
     std::cout << "TODO Judy: find nearest edge within neighborhood threshold" << std::endl;
     std::cout << "number of lines detected: "  << lineSeg.size() << std::endl;
+    
     return selectedPoint;
 }
 

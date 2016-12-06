@@ -22,6 +22,16 @@
 
 #pragma mark - ViewController Setup
 
+//namespace // anonymous namespace for local functions
+//{
+    - (void) printGLKMatrix4: (GLKMatrix4)mat {
+        std::cout << mat.m00 << "," << mat.m01 << "," << mat.m02 << "," <<mat.m03 << std::endl;
+        std::cout << mat.m10 << "," << mat.m11 << "," << mat.m12 << "," <<mat.m13 << std::endl;
+        std::cout << mat.m20 << "," << mat.m21 << "," << mat.m22 << "," <<mat.m23 << std::endl;
+        std::cout << mat.m30 << "," << mat.m31 << "," << mat.m32 << "," <<mat.m33 << std::endl;
+    }
+//}
+
 - (void)dealloc
 {
     [self.avCaptureSession stopRunning];
@@ -318,10 +328,11 @@
 //        NSLog(@"    %f %f %f %f",lastPose.m30,lastPose.m31,lastPose.m32,lastPose.m33);
         
         std::cout << "last pose:" << std::endl;
-        std::cout << lastPose.m00 << "," << lastPose.m01 << "," << lastPose.m02 << "," <<lastPose.m03 << std::endl;
-        std::cout << lastPose.m10 << "," << lastPose.m11 << "," << lastPose.m12 << "," <<lastPose.m13 << std::endl;
-        std::cout << lastPose.m20 << "," << lastPose.m21 << "," << lastPose.m22 << "," <<lastPose.m23 << std::endl;
-        std::cout << lastPose.m30 << "," << lastPose.m31 << "," << lastPose.m32 << "," <<lastPose.m33 << std::endl;
+        [self printGLKMatrix4:lastPose];
+//        std::cout << lastPose.m00 << "," << lastPose.m01 << "," << lastPose.m02 << "," <<lastPose.m03 << std::endl;
+//        std::cout << lastPose.m10 << "," << lastPose.m11 << "," << lastPose.m12 << "," <<lastPose.m13 << std::endl;
+//        std::cout << lastPose.m20 << "," << lastPose.m21 << "," << lastPose.m22 << "," <<lastPose.m23 << std::endl;
+//        std::cout << lastPose.m30 << "," << lastPose.m31 << "," << lastPose.m32 << "," <<lastPose.m33 << std::endl;
     }
 }
 

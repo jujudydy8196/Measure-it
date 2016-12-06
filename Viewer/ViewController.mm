@@ -15,6 +15,8 @@
 //------------------------------------------------------------------------------
 using namespace std;
 namespace {
+    
+    int NEIGHBOUR_THRES = 20;
 
 bool
 convertYCbCrToBGRA (
@@ -171,6 +173,7 @@ struct AppStatus
     uint measurePtCursor;
     int depthFrameWidth;
     int depthFrameHeight;
+    UIImage *interestPoints; // binary image that masks geometrically intersting points
     
     UIImageView *_selectionView; // show selected points for measurements
     int halfSquare;
@@ -688,7 +691,8 @@ const uint16_t maxShiftValue = 2048;
 //    _depthImageView.image = [UIImage imageWithCGImage:imageRef];
     
     // Find geometrically interesting points
-    _depthImageView.image = [self findInterestEdges:[UIImage imageWithCGImage:imageRef]];
+    interestPoints = [self findInterestEdges:[UIImage imageWithCGImage:imageRef]];
+    _depthImageView.image = interestPoints;
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
@@ -1021,9 +1025,19 @@ const uint16_t maxShiftValue = 2048;
     << measureCoords[2] << "," << measureCoords[3] << ")" << std::endl;
 }
 
+- (CGPoint) findInterstPointNear: (CGPoint)selectedPoint within: (int)nearThresh{
+    // reads interestPoint
+    // nearThresh defines the size of neighborhood to search for an interest point
+    
+    // TODO Yi: find nearest interest point within neighborhood threshold
+    std::cout << "TODO Yi: find nearest interest point within neighborhood threshold" << std::endl;
+    return selectedPoint;
+}
+
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
+    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
     std::cout << "touches began " << currentPoint.x << ", " << currentPoint.y << std::endl;
     NSString *coord_NSStr = [NSString stringWithFormat:@"touches began (%2.2f, %2.2f)",
                              currentPoint.x, currentPoint.y];
@@ -1065,6 +1079,7 @@ const uint16_t maxShiftValue = 2048;
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
+    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
     std::cout << "touches moved " << currentPoint.x << ", " << currentPoint.y << std::endl;
     NSString *coord_NSStr = [NSString stringWithFormat:@"touches moved (%2.2f, %2.2f)",
                              currentPoint.x, currentPoint.y];
@@ -1107,6 +1122,7 @@ const uint16_t maxShiftValue = 2048;
 - (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
+    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
     
     // Alternatively update selected points
     [self updateNextPoint:currentPoint];

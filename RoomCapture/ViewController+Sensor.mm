@@ -211,7 +211,6 @@ using namespace std;
 - (void)sensorDidOutputSynchronizedDepthFrame:(STDepthFrame *)depthFrame
                                    colorFrame:(STColorFrame*)colorFrame
 {
-    cout << "sensorDidOutputSynchronizedDepthFrame" << endl;
     if (_slamState.initialized)
     {
         [self processDepthFrame:depthFrame colorFrame:colorFrame];
@@ -235,7 +234,7 @@ using namespace std;
                     _measure.pt1NeedsConvert = false;
                 }
                 if (_measure.pt2NeedsConvert){
-                    _measure.pt2 = [self screenPtsTo3DPts:_measure.pt1 fromDepth:depthFrame];
+                    _measure.pt2 = [self screenPtsTo3DPts:_measure.pt2 fromDepth:depthFrame];
                     _measure.pt2NeedsConvert = false;
                 }
                 
@@ -253,10 +252,36 @@ using namespace std;
     }
 }
 
+// Assume the following intrinsics, from the Structure SDK docs
+// K_RGB_QVGA       = [305.73, 0, 159.69; 0, 305.62, 119.86; 0, 0, 1]
+#define QVGA_COLS 320
+#define QVGA_ROWS 240
+#define QVGA_F_X 305.73
+#define QVGA_F_Y 305.62
+#define QVGA_C_X 159.69
+#define QVGA_C_Y 119.86
 - (GLKVector3)screenPtsTo3DPts: (GLKVector3) screenPt fromDepth: (STDepthFrame *)depthFrame {
-    cout << "TOOD: Yi screen to 3D" << endl;
+    float _fx = QVGA_F_X/QVGA_COLS*depthFrame.width;
+    float _fy = QVGA_F_X/QVGA_ROWS*depthFrame.height;
+    float _cx = QVGA_C_X/QVGA_COLS*depthFrame.width;
+    float _cy = QVGA_C_Y/QVGA_ROWS*depthFrame.height;
     
-    return screenPt;
+    int r = screenPt.v[0]/3.2, c = screenPt.v[1]/3.2;
+    int pointIndex = r*depthFrame.width + c;
+    
+    float depth=depthFrame.depthInMillimeters[pointIndex];
+    float xc = depth * (c - _cx) / _fx;
+    float yc = depth * (_cy - r) / _fy;
+    float zc = depth;
+    
+    GLKVector3 ptInCam = GLKVector3Make(xc, yc, zc);
+    GLKMatrix4 camPose = _slamState.tracker.lastFrameCameraPose;
+    GLKVector3 ptInWorld = GLKMatrix4MultiplyVector3WithTranslation(camPose, ptInCam);
+    
+    
+    cout << "screen point (" << screenPt.v[0] << "," << screenPt.v[1] << ") to 3d point ("
+        << xc << "," << yc << "," << zc << ") at r:" << r << ",c:" << c << ",depth:" << depth << endl;
+    return ptInWorld;
 }
 
 @end

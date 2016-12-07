@@ -736,7 +736,7 @@ using namespace std;
             _measure.pt1NeedsConvert = true;
             
             _measure.mstatus = Measurements::MeasureOnePoint;
-            cout << "selected one point" << endl;
+            cout << "selected one point (" << _measure.pt1.v[0] << "," << _measure.pt1.v[1] << ")" << endl;
             break;
             
         case Measurements::MeasureOnePoint:
@@ -745,7 +745,7 @@ using namespace std;
             _measure.pt2 = GLKVector3Make(screenPoint.x, screenPoint.y, NAN);
             _measure.pt2NeedsConvert = true;
             _measure.mstatus = Measurements::MeasureTwoPoints;
-            cout << "selected two points" << endl;
+            cout << "selected two points (" << _measure.pt2.v[0] << "," << _measure.pt2.v[1] << ")" << endl;
 
             break;
             

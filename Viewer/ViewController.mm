@@ -1199,15 +1199,17 @@ const uint16_t maxShiftValue = 2048;
         CGContextStrokePath(context);
     }
     
-    CGContextSetLineWidth(context,3.0f);
-    /* Start the line at this point */
-    std::cout << "line idx: " << lineIdx << std::endl;
-    CGContextMoveToPoint(context,lineSeg[lineIdx][0]*3.2, lineSeg[lineIdx][1]*3.2);
-    /* And end it at this point */
-    CGContextAddLineToPoint(context,lineSeg[lineIdx][2]*3.2, lineSeg[lineIdx][3]*3.2);
-    /* Use the context's current color to draw the line */
-    CGContextSetRGBStrokeColor(context, 1.0, 1.0, 1.0, 2);
-    CGContextStrokePath(context);
+    if (lineIdx != -1) {
+        CGContextSetLineWidth(context,3.0f);
+        /* Start the line at this point */
+        std::cout << "line idx: " << lineIdx << std::endl;
+        CGContextMoveToPoint(context,lineSeg[lineIdx][0]*3.2, lineSeg[lineIdx][1]*3.2);
+        /* And end it at this point */
+        CGContextAddLineToPoint(context,lineSeg[lineIdx][2]*3.2, lineSeg[lineIdx][3]*3.2);
+        /* Use the context's current color to draw the line */
+        CGContextSetRGBStrokeColor(context, 1.0, 1.0, 1.0, 2);
+        CGContextStrokePath(context);
+    }
     
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
@@ -1344,11 +1346,12 @@ const uint16_t maxShiftValue = 2048;
             minIdx=i;
         }
     }
+    return (minDist<nearThresh) ? minIdx : -1;
 //    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
 //    cv::line( cvImage, cv::Point(lineSeg[i][0], lineSeg[i][1]),
 //             cv::Point(lineSeg[i][2], lineSeg[i][3]), cv::Scalar(0,0,255), 3, 8 );
 //    std::cout << minIdx << std::endl;
-    return minIdx;
+//    return minIdx;
 }
 
 - (UIImage *)findInterestEdges: (UIImage *)depthImage {

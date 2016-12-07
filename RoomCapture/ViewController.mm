@@ -31,6 +31,7 @@ using namespace std;
     {
         [EAGLContext setCurrentContext:nil];
     }
+    delete _graphicsRenderer; _graphicsRenderer = 0;
 }
 
 - (void)viewDidLoad

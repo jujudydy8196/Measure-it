@@ -17,7 +17,7 @@
 //#import <Structure/StructureSLAM.h>
 //#import "EAGLView.h"
 
-
+#import "GraphicsRenderer.h"
 #include <vector>
 
 struct Options
@@ -185,6 +185,8 @@ struct DisplayData
     
     // OpenGL projection matrix for the color camera.
     GLKMatrix4 colorCameraGLProjectionMatrix = GLKMatrix4Identity;
+    
+
 };
 
 // For measuring
@@ -237,6 +239,12 @@ struct Measurements {
     CalibrationOverlay* _calibrationOverlay;
     
     Measurements _measure;
+    
+    //    // Renders cubes on measured points
+    //    STCubeRenderer *cubeRenderer;
+    GraphicsRenderer *_graphicsRenderer;
+
+    
 }
 
 @property (nonatomic, retain) AVCaptureSession *avCaptureSession;

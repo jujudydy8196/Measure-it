@@ -9,6 +9,9 @@
 
 #include <cmath>
 #include <limits>
+#include <iostream>
+
+using namespace std;
 
 @implementation ViewController (OpenGL)
 
@@ -48,6 +51,11 @@
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
     }
+    
+    // YI
+    _graphicsRenderer = 0;
+    _graphicsRenderer = new GraphicsRenderer(@"measurementTape.png");
+    _graphicsRenderer->initializeGL();
 }
 
 - (void)setupGLViewport
@@ -216,6 +224,26 @@
             // MeshViewerController handles this.
         default: {}
     };
+    
+    // TODO: YI render cubes for tracked points
+    switch (_measure.mstatus){
+        case Measurements::MeasureNoPoint:{
+            // Render both points and line from last measurement if distance is not NAN
+            cout << "TODO: figure out how to draw mesh around point" << endl;
+            if (_measure.distance != NAN){
+                GLKMatrix4 currentModelView = GLKMatrix4Identity;
+                GLKMatrix4 currentProjection = _display.colorCameraGLProjectionMatrix;
+                _graphicsRenderer->renderLine(_measure.pt1, _measure.pt2, currentProjection, currentModelView, 1); //_circle1.frame.origin.x <_circle2.frame.origin.x)
+            }
+            break;
+        }
+        case Measurements::MeasureOnePoint:
+        case Measurements::MeasureTwoPoints:
+            // If pt1 does not need to be updated, render point 1
+            cout << "TODO draw measureTwoPoints" << endl;
+            break;
+        default:{}
+    }
     
     // Check for OpenGL errors
     GLenum err = glGetError ();

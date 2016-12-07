@@ -257,6 +257,8 @@ struct Measurements {
 @property (weak, nonatomic) IBOutlet UILabel *trackingMessageLabel;
 @property (weak, nonatomic) IBOutlet UILabel *roomSizeLabel;
 @property (weak, nonatomic) IBOutlet UISlider *roomSizeSlider;
+@property (weak, nonatomic) IBOutlet UIImageView *measureView;
+
 
 - (IBAction)roomSizeSliderValueChanged:(id)sender;
 - (IBAction)scanButtonPressed:(id)sender;

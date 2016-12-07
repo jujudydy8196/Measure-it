@@ -13,6 +13,7 @@
             <connections>
                 <outlet property="appStatusMessageLabel" destination="6ly-If-uZh" id="N1A-tf-yUE"/>
                 <outlet property="doneButton" destination="hrg-ff-rIb" id="UEc-xl-GpI"/>
+                <outlet property="measureView" destination="LU2-oi-6wb" id="UHn-FH-9Xg"/>
                 <outlet property="resetButton" destination="RfT-0h-QSo" id="iaF-8t-Snv"/>
                 <outlet property="roomSizeLabel" destination="CgP-p5-pMT" id="8cM-Js-ly9"/>
                 <outlet property="roomSizeSlider" destination="ZMm-ES-m1Y" id="7jV-WI-RWB"/>
@@ -94,6 +95,10 @@ Please Realign or Press Reset.</string>
                     <color key="textColor" red="0.66666666666666663" green="0.66666666666666663" blue="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" id="LU2-oi-6wb" userLabel="measureView">
+                    <rect key="frame" x="0.0" y="0.0" width="1024" height="768"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                </imageView>
             </subviews>
             <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
             <gestureRecognizers/>

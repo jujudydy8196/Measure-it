@@ -275,7 +275,7 @@ using namespace std;
     float zc = depth;
     
     GLKVector3 ptInCam = GLKVector3Make(xc, yc, zc);
-    GLKMatrix4 camPose = _slamState.tracker.lastFrameCameraPose;
+    GLKMatrix4 camPose = [_slamState.tracker lastFrameCameraPose];
     GLKVector3 ptInWorld = GLKMatrix4MultiplyVector3WithTranslation(camPose, ptInCam);
     
     

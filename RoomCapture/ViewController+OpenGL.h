@@ -19,4 +19,6 @@
 - (void)uploadGLColorTexture:(STColorFrame*)colorFrame;
 - (void)renderSceneWithDepthFrame:(STDepthFrame*)depthFrame colorFrame:(STColorFrame*)colorFrame;
 
+- (CGPoint) point3dToScreen:(GLKVector3) pt3d;
+
 @end

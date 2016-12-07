@@ -172,6 +172,7 @@ using namespace std;
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
+//#define halfSquare 15;
 - (void)renderSceneWithDepthFrame:(STDepthFrame*)depthFrame colorFrame:(STColorFrame*)colorFrame
 {
     // Activate our view framebuffer.
@@ -229,18 +230,69 @@ using namespace std;
     switch (_measure.mstatus){
         case Measurements::MeasureNoPoint:{
             // Render both points and line from last measurement if distance is not NAN
-            cout << "TODO: figure out how to draw mesh around point" << endl;
+            UIGraphicsBeginImageContextWithOptions(self.measureView.frame.size, false, 1.0f);
             if (_measure.distance != NAN){
-                GLKMatrix4 currentModelView = GLKMatrix4Identity;
-                GLKMatrix4 currentProjection = _display.colorCameraGLProjectionMatrix;
-                _graphicsRenderer->renderLine(_measure.pt1, _measure.pt2, currentProjection, currentModelView, 1); //_circle1.frame.origin.x <_circle2.frame.origin.x)
+//                GLKMatrix4 currentModelView = GLKMatrix4Identity;
+//                GLKMatrix4 currentProjection = _display.colorCameraGLProjectionMatrix;
+//                _graphicsRenderer->renderLine(_measure.pt1, _measure.pt2, currentProjection, currentModelView, 1); //_circle1.frame.origin.x <_circle2.frame.origin.x)
+                
+                CGPoint sp1 = [self point3dToScreen:_measure.pt1];
+                CGPoint sp2 = [self point3dToScreen:_measure.pt2];
+                
+                int halfSquare = 15;
+                                CGContextRef context = UIGraphicsGetCurrentContext();
+                CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+                CGContextSetLineWidth(context, 2.0);
+                CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+                
+                bool sp1Valid = [self isValidScreenPoint: sp1];
+                bool sp2Valid = [self isValidScreenPoint: sp2];
+                
+                if (sp1Valid){
+                    CGRect selectedRect = CGRectMake(sp1.x - halfSquare, sp1.y - halfSquare, halfSquare*2, halfSquare*2);
+                    CGContextFillEllipseInRect(context, selectedRect);
+                    CGContextFillPath(context);
+                }
+                if (sp2Valid){
+                    CGRect selectedRect = CGRectMake(sp2.x - halfSquare, sp2.y - halfSquare, halfSquare*2, halfSquare*2);
+                    CGContextFillEllipseInRect(context, selectedRect);
+                    CGContextFillPath(context);
+                }
+                if (sp1Valid && sp2Valid){
+                    cout << "TODO: YI draw line!" << endl;
+                }
+                
+                
             }
+            self.measureView.image = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
             break;
         }
         case Measurements::MeasureOnePoint:
         case Measurements::MeasureTwoPoints:
             // If pt1 does not need to be updated, render point 1
-            cout << "TODO draw measureTwoPoints" << endl;
+            UIGraphicsBeginImageContextWithOptions(self.measureView.frame.size, false, 1.0f);
+            if (!_measure.pt1NeedsConvert){
+                CGPoint sp1 = [self point3dToScreen:_measure.pt1];
+                int halfSquare = 15;
+                CGContextRef context = UIGraphicsGetCurrentContext();
+                CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+                CGContextSetLineWidth(context, 2.0);
+                CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+                
+                bool sp1Valid = [self isValidScreenPoint: sp1];
+                if (sp1Valid){
+                    CGRect selectedRect = CGRectMake(sp1.x - halfSquare, sp1.y - halfSquare, halfSquare*2, halfSquare*2);
+                    CGContextFillEllipseInRect(context, selectedRect);
+                    CGContextFillPath(context);
+                }
+                cout << "renderSceneWithDepthFrame Draw point" << endl;
+                cout << "pt1 valid: " << sp1Valid << endl;
+                cout << "pt1 3d coord: " << _measure.pt1.v[0] << "," << _measure.pt1.v[1] << "," << _measure.pt1.v[2] << endl;
+                cout << "pt1 coord: " << sp1.x << "," << sp1.y << endl;
+            }
+            self.measureView.image = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
             break;
         default:{}
     }
@@ -315,6 +367,44 @@ using namespace std;
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     [_display.rgbaTextureShader useShaderProgram];
     [_display.rgbaTextureShader renderTexture:GL_TEXTURE2];
+}
+
+#define QVGA_COLS 320
+#define QVGA_ROWS 240
+#define QVGA_F_X 305.73
+#define QVGA_F_Y 305.62
+#define QVGA_C_X 159.69
+#define QVGA_C_Y 119.86
+#define MAGIC_RATIO 3.2
+- (CGPoint) point3dToScreen:(GLKVector3) pt3d {
+    // input is point in world
+    GLKMatrix4 camPose = [_slamState.tracker lastFrameCameraPose];
+    bool isInvertible = false;
+    GLKMatrix4 worldToCam = GLKMatrix4Invert(camPose, &isInvertible);
+    cout << "3d pt:" << pt3d.v[0] << "," << pt3d.v[1] << "," << pt3d.v[2] << endl;
+    cout << "camInWorld:" << camPose.m00 << "," << camPose.m01 << "," << camPose.m02 << "," << camPose.m03 << endl;
+    cout << camPose.m10 << "," << camPose.m11 << "," << camPose.m12 << "," << camPose.m13 << endl;
+    cout << camPose.m20 << "," << camPose.m21 << "," << camPose.m22 << "," << camPose.m23 << endl;
+    cout << camPose.m30 << "," << camPose.m31 << "," << camPose.m32 << "," << camPose.m33 << endl;
+    cout << "worldToCam:" << worldToCam.m00 << "," << worldToCam.m01 << "," << worldToCam.m02 << "," << worldToCam.m03 << endl;
+    cout << worldToCam.m10 << "," << worldToCam.m11 << "," << worldToCam.m12 << "," << worldToCam.m13 << endl;
+    cout << worldToCam.m20 << "," << worldToCam.m21 << "," << worldToCam.m22 << "," << worldToCam.m23 << endl;
+    cout << worldToCam.m30 << "," << worldToCam.m31 << "," << worldToCam.m32 << "," << worldToCam.m33 << endl;
+
+
+    if (isInvertible){
+        GLKVector3 ptInCam = GLKMatrix4MultiplyVector3WithTranslation(worldToCam, pt3d);
+        float xs = QVGA_F_X * ptInCam.v[0] / ptInCam.v[2]+ QVGA_C_X;
+        float ys = QVGA_F_Y * ptInCam.v[1] / ptInCam.v[2]+ QVGA_C_Y;
+        cout << "screen pt:" << xs << "," << ys << endl;
+        return CGPointMake(xs*MAGIC_RATIO, ys*MAGIC_RATIO);
+    } else {
+        return CGPointMake(NAN, NAN);
+    }
+}
+
+- (bool) isValidScreenPoint: (CGPoint)sp {
+    return sp.x != NAN && sp.y != NAN && sp.x >= 0 && sp.x <= self.measureView.frame.size.width && sp.y >= 0 && sp.y <= self.measureView.frame.size.height;
 }
 
 @end

@@ -179,6 +179,9 @@ struct AppStatus
     int halfSquare;
     UITextView *coordView_; // For deubgging
     UITextView *distanceView_;
+    
+    
+    vector<cv::Vec4i> lineSeg; //For houghLinesP
 
 }
 
@@ -693,8 +696,14 @@ const uint16_t maxShiftValue = 2048;
     // Find geometrically interesting points
 //    interestPoints = [self findInterstPoints:[UIImage imageWithCGImage:imageRef]];
 
-    interestPoints = [self findInterestEdges:[UIImage imageWithCGImage:imageRef]];
+//    interestPoints = [self findInterestEdges:[UIImage imageWithCGImage:imageRef]];
+    
+    // TODO: Judy
+    interestPoints = [self findInterestEdgesSeg:[UIImage imageWithCGImage:imageRef]];
+
     _depthImageView.image = interestPoints;
+    
+    
     
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
@@ -1039,7 +1048,9 @@ const uint16_t maxShiftValue = 2048;
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
-    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
+//    currentPoint = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
+//    int lineIdx  = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
+
     std::cout << "touches began " << currentPoint.x << ", " << currentPoint.y << std::endl;
     NSString *coord_NSStr = [NSString stringWithFormat:@"touches began (%2.2f, %2.2f)",
                              currentPoint.x, currentPoint.y];
@@ -1073,6 +1084,15 @@ const uint16_t maxShiftValue = 2048;
 //        CGContextStrokeRect(context, prevRect);
     }
     
+//    CGContextSetLineWidth(context,3.0f);
+//    /* Start the line at this point */
+//    CGContextMoveToPoint(context,lineSeg[lineIdx][0], lineSeg[lineIdx][1]);
+//    /* And end it at this point */
+//    CGContextAddLineToPoint(context,lineSeg[lineIdx][2], lineSeg[lineIdx][3]);
+//    /* Use the context's current color to draw the line */
+//    CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
+//    CGContextStrokePath(context);
+    
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
@@ -1081,7 +1101,9 @@ const uint16_t maxShiftValue = 2048;
 - (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
-    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
+//    currentPoint = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
+//    int lineIdx  = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
+
     std::cout << "touches moved " << currentPoint.x << ", " << currentPoint.y << std::endl;
     NSString *coord_NSStr = [NSString stringWithFormat:@"touches moved (%2.2f, %2.2f)",
                              currentPoint.x, currentPoint.y];
@@ -1117,6 +1139,15 @@ const uint16_t maxShiftValue = 2048;
         CGContextStrokePath(context);
     }
     
+//    CGContextSetLineWidth(context,3.0f);
+//    /* Start the line at this point */
+//    CGContextMoveToPoint(context,lineSeg[lineIdx][0], lineSeg[lineIdx][1]);
+//    /* And end it at this point */
+//    CGContextAddLineToPoint(context,lineSeg[lineIdx][2], lineSeg[lineIdx][3]);
+//    /* Use the context's current color to draw the line */
+//    CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
+//    CGContextStrokePath(context);
+    
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
 }
@@ -1124,7 +1155,9 @@ const uint16_t maxShiftValue = 2048;
 - (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
-    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
+//    currentPoint = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
+    int lineIdx = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
+
     
     // Alternatively update selected points
     [self updateNextPoint:currentPoint];
@@ -1165,6 +1198,16 @@ const uint16_t maxShiftValue = 2048;
         /* Use the context's current color to draw the line */
         CGContextStrokePath(context);
     }
+    
+    CGContextSetLineWidth(context,3.0f);
+    /* Start the line at this point */
+    std::cout << "line idx: " << lineIdx << std::endl;
+    CGContextMoveToPoint(context,lineSeg[lineIdx][0]*3.2, lineSeg[lineIdx][1]*3.2);
+    /* And end it at this point */
+    CGContextAddLineToPoint(context,lineSeg[lineIdx][2]*3.2, lineSeg[lineIdx][3]*3.2);
+    /* Use the context's current color to draw the line */
+    CGContextSetRGBStrokeColor(context, 1.0, 1.0, 1.0, 2);
+    CGContextStrokePath(context);
     
     _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
@@ -1225,7 +1268,7 @@ const uint16_t maxShiftValue = 2048;
 //    std::cout << "3D pt2: (" << x2 << "," << y2<< "," << z2 << ")" << std::endl;
     
     float dist= sqrt(pow(x2-x1,2)+pow(y2-y1,2)+pow(z2-z1,2));
-    std::cout << "distance: " << dist/10.0 << std::endl;
+//    std::cout << "distance: " << dist/10.0 << std::endl;
     NSString *distance_NSStr = [NSString stringWithFormat:@"Distance: %2.2f", dist/10.0];
     distanceView_.text = distance_NSStr;
     [distanceView_ setHidden:false];
@@ -1269,12 +1312,43 @@ const uint16_t maxShiftValue = 2048;
 
 }
 
-- (CGPoint) findInterstPointNearEdge: (CGPoint)selectedPoint within: (int)nearThresh{
+- (CGFloat)distanceToLineSeg:(CGPoint)P toLineWithPointA:(CGPoint)A andPointB:(CGPoint)B {
+    if ((P.x - A.x) * (B.x - A.x) + (P.y - A.y) * (B.y - A.y) < 0)
+        return sqrt(pow((P.x - A.x), 2) + pow((P.y - A.y), 2));
+    
+    if ((P.x - B.x) * (A.x - B.x) + (P.y - B.y) * (A.y - B.y) < 0)
+        return sqrt(pow(P.x - B.x, 2) + pow(P.y - B.y, 2));
+    
+    return ABS((P.x * (A.y - B.y) + P.y * (B.x - A.x) + (A.x * B.y - B.x * A.y)) / sqrt(pow(B.x - A.x, 2) + pow(B.y - A.y, 2)));
+}
+
+- (int) findInterstPointNearEdge: (CGPoint)selectedPoint within: (int)nearThresh{
     // nearThresh defines the size of neighborhood to search for an interest point
     
-    // TODO Judy: find point snap to edge
+    // TODO Judy: find point snap to edge within circle (thres)
     std::cout << "TODO Judy: find nearest edge within neighborhood threshold" << std::endl;
-    return selectedPoint;
+//    std::cout << "number of lines detected: "  << lineSeg.size() << std::endl;
+    std::cout << "point need to snap " << selectedPoint.x << " " << selectedPoint.y << std::endl;
+    CGFloat minDist = CGFLOAT_MAX;
+    int minIdx=-1;
+    for (int i=1; i<lineSeg.size(); i++) {
+        CGPoint a = CGPointMake(lineSeg[i][0]*3.2, lineSeg[i][1]*3.2);
+        CGPoint b = CGPointMake(lineSeg[i][2]*3.2, lineSeg[i][3]*3.2);
+        std::cout << "from : (" << a.x << "," << a.y << ") to (" << b.x << "," << b.y << ")" << std::endl;
+        
+//        CGFloat dist = [distanceToLine]
+        CGFloat dist = [self distanceToLineSeg:selectedPoint toLineWithPointA:a andPointB:b ] ;
+        std::cout << "dist to line " << i << " : " << dist << std::endl;
+        if (minDist>dist) {
+            minDist=dist;
+            minIdx=i;
+        }
+    }
+//    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+//    cv::line( cvImage, cv::Point(lineSeg[i][0], lineSeg[i][1]),
+//             cv::Point(lineSeg[i][2], lineSeg[i][3]), cv::Scalar(0,0,255), 3, 8 );
+//    std::cout << minIdx << std::endl;
+    return minIdx;
 }
 
 - (UIImage *)findInterestEdges: (UIImage *)depthImage {
@@ -1302,6 +1376,27 @@ const uint16_t maxShiftValue = 2048;
 //        cv::line( cvImage, pt1, pt2, cv::Scalar(0,0,255), 3, CV_AA);
         cv::line( cvImage, pt1, pt2, cv::Scalar(0,0,255), 1, CV_AA);
 
+    }
+    return [self UIImageFromCVMat:cvImage];
+}
+
+- (UIImage *)findInterestEdgesSeg: (UIImage *)depthImage {
+    
+    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+    cv::Mat dst, cdst;
+    cv::Canny(cvImage, dst, 50, 200, 3);
+    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
+    
+//    vector<cv::Vec2f> lines;
+    cv::HoughLinesP(dst, lineSeg, 1, CV_PI/180, 75, 10, 10 );
+    
+    
+    
+    for( size_t i = 0; i < lineSeg.size(); i++ )
+    {
+        cv::line( cvImage, cv::Point(lineSeg[i][0], lineSeg[i][1]),
+                 cv::Point(lineSeg[i][2], lineSeg[i][3]), cv::Scalar(0,0,255), 3, 8 );
+        
     }
     return [self UIImageFromCVMat:cvImage];
 }

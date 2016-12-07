@@ -47,7 +47,7 @@ void preventApplicationFromStartingInTheBackgroundWhenTheStructureSensorIsPlugge
 
     NSError* error = nil;
     NSString * yi_ip = @"128.237.133.140";
-    NSString * judy_ip = @"128.237.138.87";
+    NSString * judy_ip = @"128.237.176.85";
     [STWirelessLog broadcastLogsToWirelessConsoleAtAddress:judy_ip usingPort:4999 error:&error];
 
 

@@ -1378,7 +1378,7 @@ const uint16_t maxShiftValue = 2048;
         }
     }
     std::cout << "check threshold : " << minDist << std::endl;
-    if (minIdx==-1 && minDist>nearThresh)
+    if (minIdx==-1 || minDist>nearThresh)
         return selectedPoint;
     
     cv::Point2f pt1 (lineSeg[minIdx][0]*3.2, lineSeg[minIdx][1]*3.2);
@@ -1456,6 +1456,8 @@ const uint16_t maxShiftValue = 2048;
     }
     return [self UIImageFromCVMat:cvImage];
 }
+
+
 
 - (UIImage *)findInterestEdgesSeg: (UIImage *)depthImage {
     

@@ -10,12 +10,12 @@
 #import <Structure/Structure.h>
 
 #import "CalibrationOverlay.h"
-//#import "MeshViewController.h"
-#import <UIKit/UIKit.h>
-#import <GLKit/GLKit.h>
-//#import <MessageUI/MFMailComposeViewController.h>
-#import <Structure/StructureSLAM.h>
-#import "EAGLView.h"
+#import "MeshViewController.h"
+//#import <UIKit/UIKit.h>
+//#import <GLKit/GLKit.h>
+////#import <MessageUI/MFMailComposeViewController.h>
+//#import <Structure/StructureSLAM.h>
+//#import "EAGLView.h"
 
 #include <vector>
 
@@ -186,8 +186,8 @@ struct DisplayData
     GLKMatrix4 colorCameraGLProjectionMatrix = GLKMatrix4Identity;
 };
 
-@interface ViewController : UIViewController <STBackgroundTaskDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, UIPopoverControllerDelegate, UIGestureRecognizerDelegate>
-//@interface ViewController : UIViewController <STBackgroundTaskDelegate, MeshViewDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, UIPopoverControllerDelegate, UIGestureRecognizerDelegate>
+//@interface ViewController : UIViewController <STBackgroundTaskDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, UIPopoverControllerDelegate, UIGestureRecognizerDelegate>
+@interface ViewController : UIViewController <STBackgroundTaskDelegate, MeshViewDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, UIPopoverControllerDelegate, UIGestureRecognizerDelegate>
 {
     Options _options;
     
@@ -197,8 +197,8 @@ struct DisplayData
     DisplayData _display;
     SlamData _slamState;
     
-//    STMesh *_colorizedMesh;
-//    STMesh *_holeFilledMesh;
+    STMesh *_colorizedMesh;
+    STMesh *_holeFilledMesh;
     
     // Most recent gravity vector from IMU.
     GLKVector3 _lastCoreMotionGravity;
@@ -208,15 +208,15 @@ struct DisplayData
     
     // Mesh viewer controllers.
     UINavigationController *_meshViewNavigationController;
-//    MeshViewController *_meshViewController;
+    MeshViewController *_meshViewController;
     
     // IMU handling.
     CMMotionManager *_motionManager;
     NSOperationQueue *_imuQueue;
     
     // Handles on background tasks which may be running.
-//    STBackgroundTask* _holeFillingTask;
-//    STBackgroundTask* _colorizeTask;
+    STBackgroundTask* _holeFillingTask;
+    STBackgroundTask* _colorizeTask;
     
     CalibrationOverlay* _calibrationOverlay;
 }

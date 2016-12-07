@@ -12,6 +12,7 @@
 
 #import <Structure/Structure.h>
 #import <Structure/StructureSLAM.h>
+#include <iostream>
 
 @implementation ViewController (Sensor)
 
@@ -208,6 +209,7 @@
 - (void)sensorDidOutputSynchronizedDepthFrame:(STDepthFrame *)depthFrame
                                    colorFrame:(STColorFrame*)colorFrame
 {
+    std::cout << "sensorDidOutputSynchronizedDepthFrame" << std::endl;
     if (_slamState.initialized)
     {
         [self processDepthFrame:depthFrame colorFrame:colorFrame];

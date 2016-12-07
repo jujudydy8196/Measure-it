@@ -343,7 +343,8 @@ using namespace std;
     [self.appStatusMessageLabel setHidden:NO];
     
     // Progressively show the message label.
-    [self.view setUserInteractionEnabled:false];
+    //YI
+    [self.view setUserInteractionEnabled:true];
     [UIView animateWithDuration:0.5f animations:^{
         self.appStatusMessageLabel.alpha = 1.0f;
     }completion:nil];
@@ -684,4 +685,184 @@ using namespace std;
 //    [_meshViewController hideMeshViewerMessage:_meshViewController.meshViewerMessageLabel];
 //    [_meshViewController.holeFillingSwitch setEnabled:YES];
 }
+
+//- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+//    UITouch *touch = [touches anyObject];
+//    CGPoint currentPoint = [touch locationInView:self.view];
+////    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
+//    std::cout << "touches began " << currentPoint.x << ", " << currentPoint.y << std::endl;
+////    NSString *coord_NSStr = [NSString stringWithFormat:@"touches began (%2.2f, %2.2f)",
+////                             currentPoint.x, currentPoint.y];
+////    coordView_.text = coord_NSStr;
+////    
+////    
+////    
+////    
+////    // Yi: draw square around current selections
+////    UIGraphicsBeginImageContextWithOptions(_selectionView.frame.size, false, 1.0f);
+////    CGContextRef context = UIGraphicsGetCurrentContext();
+////    CGRect selectedRect = CGRectMake(currentPoint.x - halfSquare, currentPoint.y - halfSquare,
+////                                     halfSquare*2, halfSquare*2);
+////    CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+////    CGContextSetLineWidth(context, 2.0);
+////    CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+////    CGContextFillEllipseInRect(context, selectedRect);
+////    CGContextFillPath(context);
+////    
+////    //    CGContextStrokeRect(context, selectedRect);
+////    
+////    if (!measurePtCursor) {
+////        std::cout << "add another in touch begin" << std::endl;
+////        CGRect prevRect = CGRectMake(measureCoords[0] - halfSquare, measureCoords[1] - halfSquare,
+////                                     halfSquare*2, halfSquare*2);
+////        CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
+////        CGContextSetLineWidth(context, 2.0);
+////        CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+////        CGContextFillEllipseInRect(context, prevRect);
+////        CGContextFillPath(context);
+////        //        CGContextStrokeRect(context, prevRect);
+////    }
+////    
+////    _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
+////    UIGraphicsEndImageContext();
+////    
+//}
+//
+//- (void) touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+//    UITouch *touch = [touches anyObject];
+//    CGPoint currentPoint = [touch locationInView:self.view];
+////    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
+//    std::cout << "touches moved " << currentPoint.x << ", " << currentPoint.y << std::endl;
+////    NSString *coord_NSStr = [NSString stringWithFormat:@"touches moved (%2.2f, %2.2f)",
+////                             currentPoint.x, currentPoint.y];
+////    coordView_.text = coord_NSStr;
+////    
+////    // Draw square around current selections
+////    UIGraphicsBeginImageContextWithOptions(_selectionView.frame.size, false, 1.0f);
+////    CGContextRef context = UIGraphicsGetCurrentContext();
+////    CGRect selectedRect = CGRectMake(currentPoint.x - halfSquare, currentPoint.y - halfSquare,
+////                                     halfSquare*2, halfSquare*2);
+////    CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+////    CGContextSetLineWidth(context, 2.0);
+////    CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+////    CGContextFillEllipseInRect(context, selectedRect);
+////    CGContextFillPath(context);
+////    //    CGContextStrokeRect(context, selectedRect);
+////    if (measurePtCursor) {
+////        std::cout << "add another in touch move" << std::endl;
+////        CGRect prevRect = CGRectMake(measureCoords[0] - halfSquare, measureCoords[1] - halfSquare,
+////                                     halfSquare*2, halfSquare*2);
+////        CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
+////        CGContextSetLineWidth(context, 2.0);
+////        CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+////        CGContextFillEllipseInRect(context, prevRect);
+////        CGContextFillPath(context);
+////        //        CGContextStrokeRect(context, prevRect);
+////        CGContextSetLineWidth(context,3.0f);
+////        /* Start the line at this point */
+////        CGContextMoveToPoint(context,measureCoords[0], measureCoords[1]);
+////        /* And end it at this point */
+////        CGContextAddLineToPoint(context,currentPoint.x, currentPoint.y);
+////        /* Use the context's current color to draw the line */
+////        CGContextStrokePath(context);
+////    }
+////    
+////    _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
+////    UIGraphicsEndImageContext();
+//}
+//
+//- (void) touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+//    UITouch *touch = [touches anyObject];
+//    CGPoint currentPoint = [touch locationInView:self.view];
+//    std::cout << "touches ended " << currentPoint.x << ", " << currentPoint.y << std::endl;
+//
+////    currentPoint = [self findInterstPointNear:currentPoint within: NEIGHBOUR_THRES];
+//    
+//    // Alternatively update selected points
+////    [self updateNextPoint:currentPoint];
+////    std::cout << "touches ended (" << measureCoords[0] << ", " << measureCoords[1] << ") to ("
+////    << measureCoords[2] << "," << measureCoords[3] << ")" << std::endl;
+////    NSString *coord_NSStr = [NSString stringWithFormat:@"measuring from (%2.2f, %2.2f) to (%2.2f, %2.2f)",
+////                             measureCoords[0], measureCoords[1], measureCoords[2], measureCoords[3]];
+////    coordView_.text = coord_NSStr;
+////    
+////    // Draw square around current selections
+////    UIGraphicsBeginImageContextWithOptions(_selectionView.frame.size, false, 1.0f);
+////    CGContextRef context = UIGraphicsGetCurrentContext();
+////    CGRect selectedRect = CGRectMake(currentPoint.x - halfSquare, currentPoint.y - halfSquare,
+////                                     halfSquare*2, halfSquare*2);
+////    CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+////    CGContextSetLineWidth(context, 2.0);
+////    CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+////    CGContextFillEllipseInRect(context, selectedRect);
+////    CGContextFillPath(context);
+////    //    CGContextStrokeRect(context, selectedRect);
+////    
+////    if (!measurePtCursor) {
+////        std::cout << "add another in touch end" << std::endl;
+////        CGRect prevRect = CGRectMake(measureCoords[0] - halfSquare, measureCoords[1] - halfSquare,
+////                                     halfSquare*2, halfSquare*2);
+////        CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 1);
+////        CGContextSetLineWidth(context, 2.0);
+////        CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+////        CGContextFillEllipseInRect(context, prevRect);
+////        CGContextFillPath(context);
+////        //        CGContextStrokeRect(context, prevRect);
+////        
+////        CGContextSetLineWidth(context,3.0f);
+////        /* Start the line at this point */
+////        CGContextMoveToPoint(context,measureCoords[0], measureCoords[1]);
+////        /* And end it at this point */
+////        CGContextAddLineToPoint(context,measureCoords[2], measureCoords[3]);
+////        /* Use the context's current color to draw the line */
+////        CGContextStrokePath(context);
+////    }
+////    
+////    _selectionView.image = UIGraphicsGetImageFromCurrentImageContext();
+////    UIGraphicsEndImageContext();
+//}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    UITouch *touch = [touches anyObject];
+    CGPoint touchPoint = [touch locationInView:self.view];
+    NSTimeInterval timestamp = [touch timestamp];
+    
+    GLKVector2 touchPosVec;
+    touchPosVec.x = touchPoint.x;
+    touchPosVec.y = touchPoint.y;
+
+    cout << "touch!" << endl;
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    UITouch *touch = [touches anyObject];
+    CGPoint touchPoint = [touch locationInView:self.view];
+    NSTimeInterval timestamp = [touch timestamp];
+    
+    GLKVector2 touchPosVec;
+    touchPosVec.x = touchPoint.x;
+    touchPosVec.y = touchPoint.y;
+
+    cout << "touch moved!" << endl;
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    UITouch *touch = [touches anyObject];
+    CGPoint touchPoint = [touch locationInView:self.view];
+    NSTimeInterval timestamp = [touch timestamp];
+    
+    GLKVector2 touchPosVec;
+    touchPosVec.x = touchPoint.x;
+    touchPosVec.y = touchPoint.y;
+
+    cout << "touch ends!" << endl;
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+}
+
 @end

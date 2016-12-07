@@ -296,7 +296,6 @@ namespace // anonymous namespace for local functions
             break;
         }
             
-        case RoomCaptureStateViewing:
         default:
         {} // do nothing, the MeshViewController will take care of this.
     }

@@ -214,7 +214,6 @@
         }
             
             // MeshViewerController handles this.
-        case RoomCaptureStateViewing:
         default: {}
     };
     

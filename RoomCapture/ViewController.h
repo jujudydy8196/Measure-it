@@ -69,10 +69,10 @@ enum RoomCaptureState
     RoomCaptureStateScanning,
     
     // Finalizing the mesh
-    RoomCaptureStateFinalizing,
+//    RoomCaptureStateFinalizing,
     
     // Visualizing the mesh
-    RoomCaptureStateViewing,
+//    RoomCaptureStateViewing,
     
     RoomCaptureStateNumStates
 };

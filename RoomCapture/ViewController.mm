@@ -180,25 +180,29 @@ using namespace std;
 
 - (void)enterFinalizingState
 {
-    // Cannot be lost if not scanning anymore.
-    [self hideTrackingErrorMessage];
-    
-    // Hide the Scan/Done/Reset button.
-    self.scanButton.hidden = YES;
-    self.doneButton.hidden = YES;
-    self.resetButton.hidden = YES;
-    
-    // Stop the sensors, we don't need them.
-    [_sensorController stopStreaming];
-    [self stopColorCamera];
-    
-    // Tell the mapper to compute a final triangle mesh from its data. Will also stop background processing.
-    [_slamState.mapper finalizeTriangleMesh];
-    
-    _slamState.roomCaptureState = RoomCaptureStateFinalizing;
-    
-    // Colorize the mesh in a background queue.
-    [self colorizeMeshInBackground];
+    cout << "enterFinalizingState resets instead!" << endl;
+    [self resetSLAM];
+    [self enterPoseInitializationState];
+
+//    // Cannot be lost if not scanning anymore.
+//    [self hideTrackingErrorMessage];
+//    
+//    // Hide the Scan/Done/Reset button.
+//    self.scanButton.hidden = YES;
+//    self.doneButton.hidden = YES;
+//    self.resetButton.hidden = YES;
+//    
+//    // Stop the sensors, we don't need them.
+//    [_sensorController stopStreaming];
+//    [self stopColorCamera];
+//    
+//    // Tell the mapper to compute a final triangle mesh from its data. Will also stop background processing.
+//    [_slamState.mapper finalizeTriangleMesh];
+//    
+//    _slamState.roomCaptureState = RoomCaptureStateFinalizing;
+//    
+//    // Colorize the mesh in a background queue.
+//    [self colorizeMeshInBackground];
 }
 
 - (void)colorizeMeshInBackground
@@ -237,16 +241,19 @@ using namespace std;
 
 - (void)enterViewingState
 {
-    cout << "enterViewingState" << endl;
-    // Place the camera in the center of the scanning volume.
-    GLKVector3 cameraCenter = GLKVector3MultiplyScalar(_slamState.cameraPoseInitializer.volumeSizeInMeters, 0.5);
-    GLKMatrix4 initialCameraPose = GLKMatrix4MakeTranslation(cameraCenter.x, cameraCenter.y, cameraCenter.z);
+    cout << "enterViewingState resets instead!" << endl;
+    [self resetSLAM];
+    [self enterPoseInitializationState];
     
-    [self presentMeshViewer:_colorizedMesh withCameraPose:initialCameraPose];
-    
-    _slamState.roomCaptureState = RoomCaptureStateViewing;
-    
-    [self updateIdleTimer];
+//    // Place the camera in the center of the scanning volume.
+//    GLKVector3 cameraCenter = GLKVector3MultiplyScalar(_slamState.cameraPoseInitializer.volumeSizeInMeters, 0.5);
+//    GLKMatrix4 initialCameraPose = GLKMatrix4MakeTranslation(cameraCenter.x, cameraCenter.y, cameraCenter.z);
+//    
+//    [self presentMeshViewer:_colorizedMesh withCameraPose:initialCameraPose];
+//    
+//    _slamState.roomCaptureState = RoomCaptureStateViewing;
+//    
+//    [self updateIdleTimer];
 }
 
 - (void)adjustVolumeSize:(GLKVector3)volumeSize

@@ -13,6 +13,9 @@
 #import <Structure/Structure.h>
 #import <Structure/StructureSLAM.h>
 
+#include <iostream>
+using namespace std;
+
 @implementation ViewController (Sensor)
 
 #pragma mark -  Structure Sensor delegates
@@ -208,6 +211,7 @@
 - (void)sensorDidOutputSynchronizedDepthFrame:(STDepthFrame *)depthFrame
                                    colorFrame:(STColorFrame*)colorFrame
 {
+    cout << "sensorDidOutputSynchronizedDepthFrame" << endl;
     if (_slamState.initialized)
     {
         [self processDepthFrame:depthFrame colorFrame:colorFrame];

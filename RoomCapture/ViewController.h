@@ -11,6 +11,12 @@
 
 #import "CalibrationOverlay.h"
 #import "MeshViewController.h"
+//#import <UIKit/UIKit.h>
+//#import <GLKit/GLKit.h>
+//#import <MessageUI/MFMailComposeViewController.h>
+//#import <Structure/StructureSLAM.h>
+//#import "EAGLView.h"
+
 
 #include <vector>
 
@@ -181,6 +187,7 @@ struct DisplayData
     GLKMatrix4 colorCameraGLProjectionMatrix = GLKMatrix4Identity;
 };
 
+//@interface ViewController : UIViewController <STBackgroundTaskDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, UIPopoverControllerDelegate, UIGestureRecognizerDelegate>
 @interface ViewController : UIViewController <STBackgroundTaskDelegate, MeshViewDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, UIPopoverControllerDelegate, UIGestureRecognizerDelegate>
 {
     Options _options;

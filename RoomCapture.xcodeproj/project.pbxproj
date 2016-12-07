@@ -28,7 +28,6 @@
 		2A3F2BB01857FB1600EE7A96 /* MessageUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A3F2BAF1857FB1600EE7A96 /* MessageUI.framework */; };
 		2A40186C19BA8D1E0000CA48 /* measurementTape.png in Resources */ = {isa = PBXBuildFile; fileRef = 2A40186B19BA8D1E0000CA48 /* measurementTape.png */; };
 		2A5AA3841771397A0092391A /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A5AA3831771397A0092391A /* OpenGLES.framework */; };
-		2A839F68197DC88C00A5B817 /* Joystick.mm in Sources */ = {isa = PBXBuildFile; fileRef = 2A839F67197DC88C00A5B817 /* Joystick.mm */; };
 		2A839F92197F111600A5B817 /* innerCircle@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2A839F90197F111600A5B817 /* innerCircle@2x.png */; };
 		2A839F93197F111600A5B817 /* outerCircle@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 2A839F91197F111600A5B817 /* outerCircle@2x.png */; };
 		2AB8B9C717EA78280097C231 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2AB8B9C617EA78280097C231 /* AVFoundation.framework */; };
@@ -88,8 +87,6 @@
 		2A3F2BAF1857FB1600EE7A96 /* MessageUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MessageUI.framework; path = System/Library/Frameworks/MessageUI.framework; sourceTree = SDKROOT; };
 		2A40186B19BA8D1E0000CA48 /* measurementTape.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = measurementTape.png; sourceTree = "<group>"; };
 		2A5AA3831771397A0092391A /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		2A839F66197DC88C00A5B817 /* Joystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Joystick.h; path = RoomCapture/Joystick.h; sourceTree = "<group>"; };
-		2A839F67197DC88C00A5B817 /* Joystick.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = Joystick.mm; path = RoomCapture/Joystick.mm; sourceTree = "<group>"; };
 		2A839F90197F111600A5B817 /* innerCircle@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "innerCircle@2x.png"; sourceTree = "<group>"; };
 		2A839F91197F111600A5B817 /* outerCircle@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "outerCircle@2x.png"; sourceTree = "<group>"; };
 		2AB8B9C617EA78280097C231 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -244,8 +241,6 @@
 				2A38C13619B8CEE200563312 /* GraphicsRenderer.mm */,
 				2A35A01B1975B8BA00D8C0B1 /* ViewpointController.h */,
 				2D5B8573199CB4D700F22AB9 /* ViewpointController.mm */,
-				2A839F66197DC88C00A5B817 /* Joystick.h */,
-				2A839F67197DC88C00A5B817 /* Joystick.mm */,
 				2A35A01C1975B8C100D8C0B1 /* EAGLView.h */,
 				2A35A01D1975B8C100D8C0B1 /* EAGLView.mm */,
 				6FAD6837199E8C9700033FCC /* CalibrationOverlay.h */,
@@ -357,7 +352,6 @@
 				2A38C13719B8CEE200563312 /* GraphicsRenderer.mm in Sources */,
 				7E2288C9198FE3D300F6E3B2 /* CustomUIKitStyles.mm in Sources */,
 				2D5B8572199CAF7F00F22AB9 /* MeshRenderer.mm in Sources */,
-				2A839F68197DC88C00A5B817 /* Joystick.mm in Sources */,
 				2AD988CF1A643C9D00CB1B94 /* ViewController+SLAM.mm in Sources */,
 				2AD988CD1A643C9D00CB1B94 /* ViewController+OpenGL.mm in Sources */,
 				2A35A0101975B89700D8C0B1 /* AppDelegate.mm in Sources */,

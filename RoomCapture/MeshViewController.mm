@@ -8,7 +8,7 @@
 #import "MeshRenderer.h"
 #import "GraphicsRenderer.h"
 #import "ViewpointController.h"
-#import "Joystick.h"
+//#import "Joystick.h"
 #import "CustomUIKitStyles.h"
 
 #import <ImageIO/ImageIO.h>
@@ -74,7 +74,7 @@ enum MeasurementState {
     ViewpointController *_viewpointController;
     GLfloat _glViewport[4];
     
-    Joystick *_translationJoystick;
+//    Joystick *_translationJoystick;
     
     GLKMatrix4 _cameraPoseBeforeUserInteractions;
     float _cameraFovBeforeUserInteractions;
@@ -127,12 +127,12 @@ enum MeasurementState {
         self.title = @"Structure Sensor Room Capture";
         
         // Initialize Joystick.
-        const float joystickFrameSize = self.view.frame.size.height * 0.4;
-        CGRect joystickFrame = CGRectMake(0, self.view.frame.size.height-joystickFrameSize,joystickFrameSize,joystickFrameSize);
-        _translationJoystick = [[Joystick alloc] initWithFrame:joystickFrame
-                                               backgroundImage:@"outerCircle.png"
-                                                 joystickImage:@"innerCircle.png"];
-        [self.view addSubview:_translationJoystick.view];
+//        const float joystickFrameSize = self.view.frame.size.height * 0.4;
+//        CGRect joystickFrame = CGRectMake(0, self.view.frame.size.height-joystickFrameSize,joystickFrameSize,joystickFrameSize);
+//        _translationJoystick = [[Joystick alloc] initWithFrame:joystickFrame
+//                                               backgroundImage:@"outerCircle.png"
+//                                                 joystickImage:@"innerCircle.png"];
+//        [self.view addSubview:_translationJoystick.view];
         
         [self.measurementButton applyCustomStyleWithBackgroundColor:blueButtonColorWithAlpha];
         [self.measurementGuideLabel applyCustomStyleWithBackgroundColor:blackLabelColorWithLightAlpha];
@@ -202,7 +202,7 @@ enum MeasurementState {
     
     _viewpointController->reset();
     [self hideMeshViewerMessage:self.meshViewerMessageLabel];
-    [_translationJoystick setEnabled:YES];
+//    [_translationJoystick setEnabled:YES];
     [self.topViewSwitch setOn:NO];
     [self.holeFillingSwitch setEnabled:YES];
     [self.holeFillingSwitch setOn:false];
@@ -544,7 +544,7 @@ enum MeasurementState {
     glViewport(_glViewport[0], _glViewport[1], _glViewport[2], _glViewport[3]);
     
     // Take this opportunity to process the Joystick information.
-    _viewpointController->processJoystickRadiusAndTheta([_translationJoystick radius], [_translationJoystick theta]);
+//    _viewpointController->processJoystickRadiusAndTheta([_translationJoystick radius], [_translationJoystick theta]);
     
     static MeasurementState previousState;
     bool viewpointChanged = (_viewpointController->update()) || (_measurementState != previousState);
@@ -695,7 +695,7 @@ enum MeasurementState {
 {
     bool topViewEnabled = [self.topViewSwitch isOn];
     _viewpointController->setTopViewModeEnabled (topViewEnabled);
-    [_translationJoystick setEnabled:!topViewEnabled];
+//    [_translationJoystick setEnabled:!topViewEnabled];
     self.needsDisplay = true;
 }
 
@@ -843,10 +843,10 @@ enum MeasurementState {
 // Only accept pinch gestures when the touch point does not lie within the joystick view.
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
-    CGPoint touchPoint = [touch locationInView:_translationJoystick.view];
-    if ([_translationJoystick.view pointInside:touchPoint withEvent:nil])
-        return NO;
-    else
+//    CGPoint touchPoint = [touch locationInView:_translationJoystick.view];
+//    if ([_translationJoystick.view pointInside:touchPoint withEvent:nil])
+//        return NO;
+//    else
         return YES;
 }
 

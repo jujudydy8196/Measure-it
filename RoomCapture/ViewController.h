@@ -187,6 +187,18 @@ struct DisplayData
     GLKMatrix4 colorCameraGLProjectionMatrix = GLKMatrix4Identity;
 };
 
+// For measuring
+struct Measurements {
+    GLKVector3 pt1;
+    GLKVector3 pt2;
+    enum MeasurementStatus {
+        MeasureNoPoint,
+        MeasureOnePoint,
+        MeasureTwoPoints,
+    };
+    MeasurementStatus mstatus = MeasureNoPoint;
+};
+
 //@interface ViewController : UIViewController <STBackgroundTaskDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, UIPopoverControllerDelegate, UIGestureRecognizerDelegate>
 @interface ViewController : UIViewController <STBackgroundTaskDelegate, MeshViewDelegate, AVCaptureVideoDataOutputSampleBufferDelegate, UIPopoverControllerDelegate, UIGestureRecognizerDelegate>
 {
@@ -198,8 +210,8 @@ struct DisplayData
     DisplayData _display;
     SlamData _slamState;
     
-    STMesh *_colorizedMesh;
-    STMesh *_holeFilledMesh;
+//    STMesh *_colorizedMesh;
+//    STMesh *_holeFilledMesh;
     
     // Most recent gravity vector from IMU.
     GLKVector3 _lastCoreMotionGravity;
@@ -220,6 +232,8 @@ struct DisplayData
     STBackgroundTask* _colorizeTask;
     
     CalibrationOverlay* _calibrationOverlay;
+    
+    Measurements _measure;
 }
 
 @property (nonatomic, retain) AVCaptureSession *avCaptureSession;
@@ -250,5 +264,7 @@ struct DisplayData
 - (void)updateIdleTimer;
 - (void)showTrackingMessage:(NSString*)message;
 - (void)hideTrackingErrorMessage;
+
+- (void)updateMeasurement:(GLKVector2)screenPoint;
 
 @end

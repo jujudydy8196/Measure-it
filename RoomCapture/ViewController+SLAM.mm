@@ -192,11 +192,6 @@ namespace // anonymous namespace for local functions
             {
                 // Integrate it to update the current mesh estimate.
                 GLKMatrix4 depthCameraPoseAfterTracking = [_slamState.tracker lastFrameCameraPose];
-                // YI
-                cout << "camInWorld:" << depthCameraPoseAfterTracking.m00 << "," << depthCameraPoseAfterTracking.m01 << "," << depthCameraPoseAfterTracking.m02 << "," << depthCameraPoseAfterTracking.m03 << endl;
-                cout << depthCameraPoseAfterTracking.m10 << "," << depthCameraPoseAfterTracking.m11 << "," << depthCameraPoseAfterTracking.m12 << "," << depthCameraPoseAfterTracking.m13 << endl;
-                cout << depthCameraPoseAfterTracking.m20 << "," << depthCameraPoseAfterTracking.m21 << "," << depthCameraPoseAfterTracking.m22 << "," << depthCameraPoseAfterTracking.m23 << endl;
-                cout << depthCameraPoseAfterTracking.m30 << "," << depthCameraPoseAfterTracking.m31 << "," << depthCameraPoseAfterTracking.m32 << "," << depthCameraPoseAfterTracking.m33 << endl;
                 [_slamState.mapper integrateDepthFrame:depthFrame cameraPose:depthCameraPoseAfterTracking];
                 
                 // Make sure the pose is in color camera coordinates in case we are not using registered depth.

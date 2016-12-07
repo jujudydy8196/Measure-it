@@ -262,16 +262,16 @@ using namespace std;
 #define QVGA_C_Y 119.86
 - (GLKVector3)screenPtsTo3DPts: (GLKVector3) screenPt fromDepth: (STDepthFrame *)depthFrame {
     float _fx = QVGA_F_X/QVGA_COLS*depthFrame.width;
-    float _fy = QVGA_F_X/QVGA_ROWS*depthFrame.height;
+    float _fy = QVGA_F_Y/QVGA_ROWS*depthFrame.height;
     float _cx = QVGA_C_X/QVGA_COLS*depthFrame.width;
     float _cy = QVGA_C_Y/QVGA_ROWS*depthFrame.height;
     
-    int r = screenPt.v[0]/3.2, c = screenPt.v[1]/3.2;
+    int r = screenPt.v[1]/3.2, c = screenPt.v[0]/3.2;
     int pointIndex = r*depthFrame.width + c;
     
     float depth=depthFrame.depthInMillimeters[pointIndex];
     float xc = depth * (c - _cx) / _fx;
-    float yc = depth * (_cy - r) / _fy;
+    float yc = depth * (r - _cy) / _fy;
     float zc = depth;
     
     GLKVector3 ptInCam = GLKVector3Make(xc, yc, zc);
@@ -281,6 +281,7 @@ using namespace std;
     
     cout << "screen point (" << screenPt.v[0] << "," << screenPt.v[1] << ") to 3d point ("
         << xc << "," << yc << "," << zc << ") at r:" << r << ",c:" << c << ",depth:" << depth << endl;
+    cout << "_fx:" << _fx << " _fy:" << _fy << " _cx:" << _cx << " _cy:" << _cy << endl;
     return ptInWorld;
 }
 

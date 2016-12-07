@@ -382,14 +382,14 @@ using namespace std;
     bool isInvertible = false;
     GLKMatrix4 worldToCam = GLKMatrix4Invert(camPose, &isInvertible);
     cout << "3d pt:" << pt3d.v[0] << "," << pt3d.v[1] << "," << pt3d.v[2] << endl;
-    cout << "camInWorld:" << camPose.m00 << "," << camPose.m01 << "," << camPose.m02 << "," << camPose.m03 << endl;
-    cout << camPose.m10 << "," << camPose.m11 << "," << camPose.m12 << "," << camPose.m13 << endl;
-    cout << camPose.m20 << "," << camPose.m21 << "," << camPose.m22 << "," << camPose.m23 << endl;
-    cout << camPose.m30 << "," << camPose.m31 << "," << camPose.m32 << "," << camPose.m33 << endl;
-    cout << "worldToCam:" << worldToCam.m00 << "," << worldToCam.m01 << "," << worldToCam.m02 << "," << worldToCam.m03 << endl;
-    cout << worldToCam.m10 << "," << worldToCam.m11 << "," << worldToCam.m12 << "," << worldToCam.m13 << endl;
-    cout << worldToCam.m20 << "," << worldToCam.m21 << "," << worldToCam.m22 << "," << worldToCam.m23 << endl;
-    cout << worldToCam.m30 << "," << worldToCam.m31 << "," << worldToCam.m32 << "," << worldToCam.m33 << endl;
+//    cout << "camInWorld:" << camPose.m00 << "," << camPose.m01 << "," << camPose.m02 << "," << camPose.m03 << endl;
+//    cout << camPose.m10 << "," << camPose.m11 << "," << camPose.m12 << "," << camPose.m13 << endl;
+//    cout << camPose.m20 << "," << camPose.m21 << "," << camPose.m22 << "," << camPose.m23 << endl;
+//    cout << camPose.m30 << "," << camPose.m31 << "," << camPose.m32 << "," << camPose.m33 << endl;
+//    cout << "worldToCam:" << worldToCam.m00 << "," << worldToCam.m01 << "," << worldToCam.m02 << "," << worldToCam.m03 << endl;
+//    cout << worldToCam.m10 << "," << worldToCam.m11 << "," << worldToCam.m12 << "," << worldToCam.m13 << endl;
+//    cout << worldToCam.m20 << "," << worldToCam.m21 << "," << worldToCam.m22 << "," << worldToCam.m23 << endl;
+//    cout << worldToCam.m30 << "," << worldToCam.m31 << "," << worldToCam.m32 << "," << worldToCam.m33 << endl;
 
 
     if (isInvertible){

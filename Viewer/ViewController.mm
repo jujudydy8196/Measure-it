@@ -1049,7 +1049,7 @@ const uint16_t maxShiftValue = 2048;
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
 //    currentPoint = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
-//    int lineIdx  = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
+    int lineIdx  = [self findNearEdge:currentPoint within: NEIGHBOUR_THRES];
 
     std::cout << "touches began " << currentPoint.x << ", " << currentPoint.y << std::endl;
     NSString *coord_NSStr = [NSString stringWithFormat:@"touches began (%2.2f, %2.2f)",
@@ -1084,6 +1084,18 @@ const uint16_t maxShiftValue = 2048;
 //        CGContextStrokeRect(context, prevRect);
     }
     
+    if (lineIdx != -1) {
+        CGContextSetLineWidth(context,3.0f);
+        /* Start the line at this point */
+        std::cout << "line idx: " << lineIdx << std::endl;
+        CGContextMoveToPoint(context,lineSeg[lineIdx][0]*3.2, lineSeg[lineIdx][1]*3.2);
+        /* And end it at this point */
+        CGContextAddLineToPoint(context,lineSeg[lineIdx][2]*3.2, lineSeg[lineIdx][3]*3.2);
+        /* Use the context's current color to draw the line */
+        CGContextSetRGBStrokeColor(context, 1.0, 1.0, 1.0, 2);
+        CGContextStrokePath(context);
+    }
+    
 //    CGContextSetLineWidth(context,3.0f);
 //    /* Start the line at this point */
 //    CGContextMoveToPoint(context,lineSeg[lineIdx][0], lineSeg[lineIdx][1]);
@@ -1102,7 +1114,7 @@ const uint16_t maxShiftValue = 2048;
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
 //    currentPoint = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
-//    int lineIdx  = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
+    int lineIdx  = [self findNearEdge:currentPoint within: NEIGHBOUR_THRES];
 
     std::cout << "touches moved " << currentPoint.x << ", " << currentPoint.y << std::endl;
     NSString *coord_NSStr = [NSString stringWithFormat:@"touches moved (%2.2f, %2.2f)",
@@ -1139,6 +1151,18 @@ const uint16_t maxShiftValue = 2048;
         CGContextStrokePath(context);
     }
     
+        if (lineIdx != -1) {
+            CGContextSetLineWidth(context,3.0f);
+            /* Start the line at this point */
+            std::cout << "line idx: " << lineIdx << std::endl;
+            CGContextMoveToPoint(context,lineSeg[lineIdx][0]*3.2, lineSeg[lineIdx][1]*3.2);
+            /* And end it at this point */
+            CGContextAddLineToPoint(context,lineSeg[lineIdx][2]*3.2, lineSeg[lineIdx][3]*3.2);
+            /* Use the context's current color to draw the line */
+            CGContextSetRGBStrokeColor(context, 1.0, 1.0, 1.0, 2);
+            CGContextStrokePath(context);
+        }
+    
 //    CGContextSetLineWidth(context,3.0f);
 //    /* Start the line at this point */
 //    CGContextMoveToPoint(context,lineSeg[lineIdx][0], lineSeg[lineIdx][1]);
@@ -1156,8 +1180,11 @@ const uint16_t maxShiftValue = 2048;
     UITouch *touch = [touches anyObject];
     CGPoint currentPoint = [touch locationInView:self.view];
     std::cout << "before snap: (" << currentPoint.x << "," << currentPoint.y << ")" << std::endl;
-    currentPoint = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
-    std::cout << "after snap: (" << currentPoint.x << "," << currentPoint.y << ")" << std::endl;
+    CGPoint snapPoint = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
+    if (!CGPointEqualToPoint(currentPoint,snapPoint)) {
+        std::cout << "after snap: (" << snapPoint.x << "," << snapPoint.y << ")" << std::endl;
+        currentPoint = snapPoint;
+    }
 
     
 //    int lineIdx = [self findInterstPointNearEdge:currentPoint within: NEIGHBOUR_THRES];
@@ -1165,6 +1192,7 @@ const uint16_t maxShiftValue = 2048;
     
     // Alternatively update selected points
     [self updateNextPoint:currentPoint];
+    
     std::cout << "touches ended (" << measureCoords[0] << ", " << measureCoords[1] << ") to ("
                 << measureCoords[2] << "," << measureCoords[3] << ")" << std::endl;
     NSString *coord_NSStr = [NSString stringWithFormat:@"measuring from (%2.2f, %2.2f) to (%2.2f, %2.2f)",
@@ -1349,7 +1377,8 @@ const uint16_t maxShiftValue = 2048;
             minIdx=i;
         }
     }
-    if (minIdx==-1)
+    std::cout << "check threshold : " << minDist << std::endl;
+    if (minIdx==-1 && minDist>nearThresh)
         return selectedPoint;
     
     cv::Point2f pt1 (lineSeg[minIdx][0]*3.2, lineSeg[minIdx][1]*3.2);
@@ -1374,6 +1403,30 @@ const uint16_t maxShiftValue = 2048;
 //    std::cout << minIdx << std::endl;
 //    return minIdx;
 }
+
+- (int) findNearEdge: (CGPoint)selectedPoint within: (int)nearThresh{
+
+    std::cout << "point need to snap " << selectedPoint.x << " " << selectedPoint.y << std::endl;
+    CGFloat minDist = CGFLOAT_MAX;
+    int minIdx=-1;
+    for (int i=1; i<lineSeg.size(); i++) {
+        CGPoint a = CGPointMake(lineSeg[i][0]*3.2, lineSeg[i][1]*3.2);
+        CGPoint b = CGPointMake(lineSeg[i][2]*3.2, lineSeg[i][3]*3.2);
+        std::cout << "from : (" << a.x << "," << a.y << ") to (" << b.x << "," << b.y << ")" << std::endl;
+        
+        //        CGFloat dist = [distanceToLine]
+        CGFloat dist = [self distanceToLineSeg:selectedPoint toLineWithPointA:a andPointB:b ] ;
+        std::cout << "dist to line " << i << " : " << dist << std::endl;
+        if (minDist>dist) {
+            minDist=dist;
+            minIdx=i;
+        }
+    }
+    
+        return (minDist<nearThresh) ? minIdx : -1;
+
+}
+
 
 - (UIImage *)findInterestEdges: (UIImage *)depthImage {
     

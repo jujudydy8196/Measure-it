@@ -20,4 +20,6 @@
 - (void)setupStructureSensor;
 - (BOOL)isStructureConnectedAndCharged;
 
+- (GLKVector3)screenPtsTo3DPts: (GLKVector3)screenPt fromDepth: (STDepthFrame *)depthFrame;
+
 @end

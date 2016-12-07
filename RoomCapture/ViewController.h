@@ -189,8 +189,11 @@ struct DisplayData
 
 // For measuring
 struct Measurements {
-    GLKVector3 pt1;
-    GLKVector3 pt2;
+    GLKVector3 pt1 = GLKVector3Make(NAN, NAN, NAN);
+    GLKVector3 pt2 = GLKVector3Make(NAN, NAN, NAN);
+    bool pt1NeedsConvert;
+    bool pt2NeedsConvert;
+    float distance = NAN;
     enum MeasurementStatus {
         MeasureNoPoint,
         MeasureOnePoint,
@@ -265,6 +268,6 @@ struct Measurements {
 - (void)showTrackingMessage:(NSString*)message;
 - (void)hideTrackingErrorMessage;
 
-- (void)updateMeasurement:(GLKVector2)screenPoint;
+- (void)updateMeasurement:(CGPoint)screenPoint;
 
 @end

@@ -217,7 +217,46 @@ using namespace std;
         [self processDepthFrame:depthFrame colorFrame:colorFrame];
         // Scene rendering is triggered by new frames to avoid rendering the same view several times.
         [self renderSceneWithDepthFrame:depthFrame colorFrame:colorFrame];
+        
+        switch (_measure.mstatus) {
+            case Measurements::MeasureNoPoint:
+                break;
+                
+            case Measurements::MeasureOnePoint:
+                if (_measure.pt1NeedsConvert){
+                    _measure.pt1 = [self screenPtsTo3DPts:_measure.pt1 fromDepth:depthFrame];
+                    _measure.pt1NeedsConvert = false;
+                }
+                break;
+                
+            case Measurements::MeasureTwoPoints:
+                if (_measure.pt1NeedsConvert){
+                    _measure.pt1 = [self screenPtsTo3DPts:_measure.pt1 fromDepth:depthFrame];
+                    _measure.pt1NeedsConvert = false;
+                }
+                if (_measure.pt2NeedsConvert){
+                    _measure.pt2 = [self screenPtsTo3DPts:_measure.pt1 fromDepth:depthFrame];
+                    _measure.pt2NeedsConvert = false;
+                }
+                
+                // Calculate distance
+                _measure.distance = GLKVector3Length(GLKVector3Subtract(_measure.pt2, _measure.pt1));
+                cout << "distance: " << _measure.distance << endl;
+                _measure.mstatus = Measurements::MeasureNoPoint;
+                
+                // TODO: Yi display distance
+                cout << "TODO: Yi display distance" << endl;
+                break;
+                
+            default:{}
+        }
     }
+}
+
+- (GLKVector3)screenPtsTo3DPts: (GLKVector3) screenPt fromDepth: (STDepthFrame *)depthFrame {
+    cout << "TOOD: Yi screen to 3D" << endl;
+    
+    return screenPt;
 }
 
 @end

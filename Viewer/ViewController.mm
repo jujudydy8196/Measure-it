@@ -11,6 +11,8 @@
 #import <algorithm>
 #include <iostream>
 #include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/features2d/features2d.hpp"
+//#include "opencv2/line_descriptor.hpp"
 
 //------------------------------------------------------------------------------
 using namespace std;
@@ -1092,7 +1094,7 @@ const uint16_t maxShiftValue = 2048;
         /* And end it at this point */
         CGContextAddLineToPoint(context,lineSeg[lineIdx][2]*3.2, lineSeg[lineIdx][3]*3.2);
         /* Use the context's current color to draw the line */
-        CGContextSetRGBStrokeColor(context, 1.0, 1.0, 1.0, 2);
+        CGContextSetRGBStrokeColor(context, 0, 1.0, 1.0, 2);
         CGContextStrokePath(context);
     }
     
@@ -1159,7 +1161,7 @@ const uint16_t maxShiftValue = 2048;
             /* And end it at this point */
             CGContextAddLineToPoint(context,lineSeg[lineIdx][2]*3.2, lineSeg[lineIdx][3]*3.2);
             /* Use the context's current color to draw the line */
-            CGContextSetRGBStrokeColor(context, 1.0, 1.0, 1.0, 2);
+            CGContextSetRGBStrokeColor(context, 0, 1.0, 1.0, 2);
             CGContextStrokePath(context);
         }
     
@@ -1463,7 +1465,7 @@ const uint16_t maxShiftValue = 2048;
     
     cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
     cv::Mat dst, cdst;
-    cv::Canny(cvImage, dst, 50, 200, 3);
+    cv::Canny(cvImage, dst, 20, 200, 3);
     
 //    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
     cv::HoughLinesP(dst, lineSeg, 1, CV_PI/180, 75, 10, 10 );
@@ -1473,11 +1475,47 @@ const uint16_t maxShiftValue = 2048;
     for( size_t i = 0; i < lineSeg.size(); i++ )
     {
         cv::line( cvImage, cv::Point(lineSeg[i][0], lineSeg[i][1]),
-                 cv::Point(lineSeg[i][2], lineSeg[i][3]), cv::Scalar(0,0,255), 3, 8 );
+                 cv::Point(lineSeg[i][2], lineSeg[i][3]), cv::Scalar(255,255,255), 3, 8 );
         
     }
     return [self UIImageFromCVMat:cvImage];
 }
+
+//
+//- (UIImage *)findInterestEdgesSegWithLSD: (UIImage *)depthImage {
+//    
+//    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+//    
+//    /* create a ramdom binary mask */
+//    cv::Mat mask = cv::Mat::ones( cvImage.size(), CV_8UC1 );
+//    
+//    /* create a pointer to a BinaryDescriptor object with deafult parameters */
+//    cv::Ptr<cv::line_descriptor::BinaryDescriptor> bd = BinaryDescriptor::createBinaryDescriptor();
+//    
+//    /* create a structure to store extracted lines */
+//    vector<KeyLine> lines;
+//    
+//    /* extract lines */
+//    bd->detect( imageMat, lines, mask );
+//    
+//    
+//    cv::Mat dst, cdst;
+//    cv::Canny(cvImage, dst, 50, 200, 3);
+//    
+//    //    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
+//    cv::HoughLinesP(dst, lineSeg, 1, CV_PI/180, 75, 10, 10 );
+//    
+//    
+//    
+//    for( size_t i = 0; i < lineSeg.size(); i++ )
+//    {
+//        cv::line( cvImage, cv::Point(lineSeg[i][0], lineSeg[i][1]),
+//                 cv::Point(lineSeg[i][2], lineSeg[i][3]), cv::Scalar(0,0,255), 3, 8 );
+//        
+//    }
+//    return [self UIImageFromCVMat:cvImage];
+//}
+//
 
 //---------------- Provided functions from class ------------------
 // Member functions for converting from cvMat to UIImage

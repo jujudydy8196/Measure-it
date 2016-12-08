@@ -259,6 +259,7 @@ struct Measurements {
 @property (weak, nonatomic) IBOutlet UISlider *roomSizeSlider;
 @property (weak, nonatomic) IBOutlet UIImageView *measureView;
 @property (weak, nonatomic) IBOutlet UILabel *distanceLabel;
+@property (weak, nonatomic) IBOutlet UIImageView *selectView;
 
 
 - (IBAction)roomSizeSliderValueChanged:(id)sender;

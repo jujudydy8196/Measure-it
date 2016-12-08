@@ -14,11 +14,15 @@
 
 @interface ViewController (OpenGL)
 
+
 - (void)setupGL;
 - (void)setupGLViewport;
 - (void)uploadGLColorTexture:(STColorFrame*)colorFrame;
 - (void)renderSceneWithDepthFrame:(STDepthFrame*)depthFrame colorFrame:(STColorFrame*)colorFrame;
 
 - (CGPoint) point3dToScreen:(GLKVector3) pt3d;
+
+- (void)populateLinearizeBuffer;
+- (void)convertShiftToRGBA:(const uint16_t*)shiftValues depthValuesCount:(size_t)depthValuesCount;
 
 @end

@@ -18,6 +18,9 @@
 #include <cmath>
 #include <iostream>
 using namespace std;
+namespace  {
+    int NEIGHBOUR_THRES = 20;
+}
 
 @implementation ViewController
 
@@ -55,6 +58,7 @@ using namespace std;
                                              selector:@selector(appDidBecomeActive)
                                                  name:UIApplicationDidBecomeActiveNotification
                                                object:nil];
+//    interestPoints = [self findInterestEdgesSeg:[UIImage imageWithCGImage:imageRef]];
     
 }
 
@@ -693,8 +697,29 @@ using namespace std;
     UITouch *touch = [touches anyObject];
     CGPoint touchPoint = [touch locationInView:self.view];
     NSTimeInterval timestamp = [touch timestamp];
+
     
     std::cout << "touches began " << touchPoint.x << ", " << touchPoint.y << std::endl;
+    
+    int lineIdx  = [self findNearEdge:touchPoint within: NEIGHBOUR_THRES];
+    
+    UIGraphicsBeginImageContextWithOptions(self.measureView.frame.size, false, 1.0f);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    if (lineIdx != -1) {
+        CGContextSetLineWidth(context,3.0f);
+        /* Start the line at this point */
+        std::cout << "line idx: " << lineIdx << std::endl;
+        CGContextMoveToPoint(context,lineSeg[lineIdx][0]*3.2, lineSeg[lineIdx][1]*3.2);
+        /* And end it at this point */
+        CGContextAddLineToPoint(context,lineSeg[lineIdx][2]*3.2, lineSeg[lineIdx][3]*3.2);
+        /* Use the context's current color to draw the line */
+        CGContextSetRGBStrokeColor(context, 0, 1.0, 1.0, 2);
+        CGContextStrokePath(context);
+    }
+    self.measureView.image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+    
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
@@ -757,6 +782,39 @@ using namespace std;
         default: {}
     }
 
+}
+
+- (int) findNearEdge: (CGPoint)selectedPoint within: (int)nearThresh{
+    
+    std::cout << "point need to snap " << selectedPoint.x << " " << selectedPoint.y << std::endl;
+    CGFloat minDist = CGFLOAT_MAX;
+    int minIdx=-1;
+    for (int i=1; i<lineSeg.size(); i++) {
+        CGPoint a = CGPointMake(lineSeg[i][0]*3.2, lineSeg[i][1]*3.2);
+        CGPoint b = CGPointMake(lineSeg[i][2]*3.2, lineSeg[i][3]*3.2);
+        std::cout << "from : (" << a.x << "," << a.y << ") to (" << b.x << "," << b.y << ")" << std::endl;
+        
+        //        CGFloat dist = [distanceToLine]
+        CGFloat dist = [self distanceToLineSeg:selectedPoint toLineWithPointA:a andPointB:b ] ;
+        std::cout << "dist to line " << i << " : " << dist << std::endl;
+        if (minDist>dist) {
+            minDist=dist;
+            minIdx=i;
+        }
+    }
+    
+    return (minDist<nearThresh) ? minIdx : -1;
+    
+}
+
+- (CGFloat)distanceToLineSeg:(CGPoint)P toLineWithPointA:(CGPoint)A andPointB:(CGPoint)B {
+    if ((P.x - A.x) * (B.x - A.x) + (P.y - A.y) * (B.y - A.y) < 0)
+        return sqrt(pow((P.x - A.x), 2) + pow((P.y - A.y), 2));
+    
+    if ((P.x - B.x) * (A.x - B.x) + (P.y - B.y) * (A.y - B.y) < 0)
+        return sqrt(pow(P.x - B.x, 2) + pow(P.y - B.y, 2));
+    
+    return ABS((P.x * (A.y - B.y) + P.y * (B.x - A.x) + (A.x * B.y - B.x * A.y)) / sqrt(pow(B.x - A.x, 2) + pow(B.y - A.y, 2)));
 }
 
 @end

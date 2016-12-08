@@ -172,9 +172,126 @@ using namespace std;
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
+const uint16_t maxShiftValue = 2048;
+
+- (void)populateLinearizeBuffer
+{
+    _linearizeBuffer = (uint16_t*)malloc((maxShiftValue + 1) * sizeof(uint16_t));
+    
+    for (int i=0; i <= maxShiftValue; i++)
+    {
+        float v = i / (float)maxShiftValue;
+        v = powf(v, 3)* 6;
+        _linearizeBuffer[i] = v*6*256;
+    }
+}
+
+// Conversion of 16-bit non-linear shift depth values to 32-bit RGBA
+// Adapted from: https://github.com/OpenKinect/libfreenect/blob/master/examples/glview.c
+// This function is equivalent to calling [STDepthAsRgba convertDepthFrameToRgba] with the STDepthToRgbaStrategyRedToBlueGradient strategy.
+// Not using the SDK here for didactic purposes.
+- (void)convertShiftToRGBA:(const uint16_t*)shiftValues depthValuesCount:(size_t)depthValuesCount
+{
+    
+    //    std::cout << depthValuesCount << std::endl;
+    
+    for (size_t i = 0; i < depthValuesCount; i++)
+    {
+        
+        // We should not get higher values than maxShiftValue, but let's stay on the safe side.
+        uint16_t boundedShift = std::min (shiftValues[i], maxShiftValue);
+        // Use a lookup table to make the non-linear input values vary more linearly with metric depth
+        int linearizedDepth = _linearizeBuffer[boundedShift];
+        
+        // Use the upper byte of the linearized shift value to choose a base color
+        // Base colors range from: (closest) White, Red, Orange, Yellow, Green, Cyan, Blue, Black (farthest)
+        int lowerByte = (linearizedDepth & 0xff);
+        
+        // Use the lower byte to scale between the base colors
+        int upperByte = (linearizedDepth >> 8);
+        
+        switch (upperByte)
+        {
+            case 0:
+                _coloredDepthBuffer[4 * i + 0] = 255;
+                _coloredDepthBuffer[4 * i + 1] = 255 - lowerByte;
+                _coloredDepthBuffer[4 * i + 2] = 255 - lowerByte;
+                _coloredDepthBuffer[4 * i + 3] = 255;
+                break;
+            case 1:
+                _coloredDepthBuffer[4 * i + 0] = 255;
+                _coloredDepthBuffer[4 * i + 1] = lowerByte;
+                _coloredDepthBuffer[4 * i + 2] = 0;
+                break;
+            case 2:
+                _coloredDepthBuffer[4 * i + 0] = 255 - lowerByte;
+                _coloredDepthBuffer[4 * i + 1] = 255;
+                _coloredDepthBuffer[4 * i + 2] = 0;
+                break;
+            case 3:
+                _coloredDepthBuffer[4 * i + 0] = 0;
+                _coloredDepthBuffer[4 * i + 1] = 255;
+                _coloredDepthBuffer[4 * i + 2] = lowerByte;
+                break;
+            case 4:
+                _coloredDepthBuffer[4 * i + 0] = 0;
+                _coloredDepthBuffer[4 * i + 1] = 255 - lowerByte;
+                _coloredDepthBuffer[4 * i + 2] = 255;
+                break;
+            case 5:
+                _coloredDepthBuffer[4 * i + 0] = 0;
+                _coloredDepthBuffer[4 * i + 1] = 0;
+                _coloredDepthBuffer[4 * i + 2] = 255 - lowerByte;
+                break;
+            default:
+                _coloredDepthBuffer[4 * i + 0] = 0;
+                _coloredDepthBuffer[4 * i + 1] = 0;
+                _coloredDepthBuffer[4 * i + 2] = 0;
+                break;
+        }
+    }
+}
+
+
 //#define halfSquare 15;
 - (void)renderSceneWithDepthFrame:(STDepthFrame*)depthFrame colorFrame:(STColorFrame*)colorFrame
 {
+    // TODO: JUDY line seg
+    size_t cols = depthFrame.width;
+    size_t rows = depthFrame.height;
+    //    std::cout << "cols : " << cols << " rows: " << rows << std::endl;
+    
+    if (_linearizeBuffer == NULL) //|| _normalsBuffer == NULL)
+    {
+        [self populateLinearizeBuffer];
+        _coloredDepthBuffer = (uint8_t*)malloc(cols * rows * 4);
+    }
+    
+    [self convertShiftToRGBA:depthFrame.shiftData depthValuesCount:cols * rows];
+    //    [self distance:depthFrame.shiftData depthValuesCount:cols * rows];
+//    [self distance:depthFrame];
+    
+    CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+    
+    CGBitmapInfo bitmapInfo;
+    bitmapInfo = (CGBitmapInfo)kCGImageAlphaNoneSkipLast;
+    bitmapInfo |= kCGBitmapByteOrder32Big;
+    
+    NSData *data = [NSData dataWithBytes:_coloredDepthBuffer length:cols * rows * 4];
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data); //toll-free ARC bridging
+    
+    CGImageRef imageRef = CGImageCreate(cols,                       //width
+                                        rows,                        //height
+                                        8,                           //bits per component
+                                        8 * 4,                       //bits per pixel
+                                        cols * 4,                    //bytes per row
+                                        colorSpace,                  //Quartz color space
+                                        bitmapInfo,                  //Bitmap info (alpha channel?, order, etc)
+                                        provider,                    //Source of data for bitmap
+                                        NULL,                        //decode
+                                        false,                       //pixel interpolation
+                                        kCGRenderingIntentDefault);  //rendering intent
+    [self findInterestEdgesSeg:[UIImage imageWithCGImage:imageRef]];
     // Activate our view framebuffer.
     [(EAGLView *)self.view setFramebuffer];
     
@@ -228,6 +345,7 @@ using namespace std;
     
     // TODO: YI render cubes for tracked points
     switch (_measure.mstatus){
+        
         case Measurements::MeasureNoPoint:{
             // Render both points and line from last measurement if distance is not NAN
             UIGraphicsBeginImageContextWithOptions(self.measureView.frame.size, false, 1.0f);
@@ -240,7 +358,7 @@ using namespace std;
                 CGPoint sp2 = [self point3dToScreen:_measure.pt2];
                 
                 int halfSquare = 15;
-                                CGContextRef context = UIGraphicsGetCurrentContext();
+                CGContextRef context = UIGraphicsGetCurrentContext();
                 CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
                 CGContextSetLineWidth(context, 2.0);
                 CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
@@ -406,5 +524,90 @@ using namespace std;
 - (bool) isValidScreenPoint: (CGPoint)sp {
     return sp.x != NAN && sp.y != NAN && sp.x >= 0 && sp.x <= self.measureView.frame.size.width && sp.y >= 0 && sp.y <= self.measureView.frame.size.height;
 }
+
+- (UIImage *)findInterestEdgesSeg: (UIImage *)depthImage {
+    
+    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+    cv::Mat dst, cdst;
+    cv::Canny(cvImage, dst, 20, 200, 3);
+    
+    //    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
+    cv::HoughLinesP(dst, lineSeg, 1, CV_PI/180, 75, 10, 10 );
+    
+    
+    
+    for( size_t i = 0; i < lineSeg.size(); i++ )
+    {
+        cv::line( cvImage, cv::Point(lineSeg[i][0], lineSeg[i][1]),
+                 cv::Point(lineSeg[i][2], lineSeg[i][3]), cv::Scalar(255,255,255), 3, 8 );
+        
+    }
+    return [self UIImageFromCVMat:cvImage];
+}
+
+//---------------- Provided functions from class ------------------
+// Member functions for converting from cvMat to UIImage
+- (cv::Mat)cvMatFromUIImage:(UIImage *)image
+{
+    CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
+    CGFloat cols = image.size.width;
+    CGFloat rows = image.size.height;
+    
+    cv::Mat cvMat(rows, cols, CV_8UC4); // 8 bits per component, 4 channels (color channels + alpha)
+    
+    CGContextRef contextRef = CGBitmapContextCreate(cvMat.data,                 // Pointer to  data
+                                                    cols,                       // Width of bitmap
+                                                    rows,                       // Height of bitmap
+                                                    8,                          // Bits per component
+                                                    cvMat.step[0],              // Bytes per row
+                                                    colorSpace,                 // Colorspace
+                                                    kCGImageAlphaNoneSkipLast |
+                                                    kCGBitmapByteOrderDefault); // Bitmap info flags
+    
+    CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
+    CGContextRelease(contextRef);
+    
+    return cvMat;
+}
+// Member functions for converting from UIImage to cvMat
+
+-(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat
+{
+    NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
+    CGColorSpaceRef colorSpace;
+    
+    if (cvMat.elemSize() == 1) {
+        colorSpace = CGColorSpaceCreateDeviceGray();
+    } else {
+        colorSpace = CGColorSpaceCreateDeviceRGB();
+    }
+    
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
+    
+    // Creating CGImage from cv::Mat
+    CGImageRef imageRef = CGImageCreate(cvMat.cols,                                 //width
+                                        cvMat.rows,                                 //height
+                                        8,                                          //bits per component
+                                        8 * cvMat.elemSize(),                       //bits per pixel
+                                        cvMat.step[0],                            //bytesPerRow
+                                        colorSpace,                                 //colorspace
+                                        kCGImageAlphaNone|kCGBitmapByteOrderDefault,// bitmap info
+                                        provider,                                   //CGDataProviderRef
+                                        NULL,                                       //decode
+                                        false,                                      //should interpolate
+                                        kCGRenderingIntentDefault                   //intent
+                                        );
+    
+    
+    // Getting UIImage from CGImage
+    UIImage *finalImage = [UIImage imageWithCGImage:imageRef];
+    CGImageRelease(imageRef);
+    CGDataProviderRelease(provider);
+    CGColorSpaceRelease(colorSpace);
+    
+    return finalImage;
+}
+
+
 
 @end

@@ -11,6 +11,7 @@
 
 #import "CalibrationOverlay.h"
 #import "MeshViewController.h"
+
 //#import <UIKit/UIKit.h>
 //#import <GLKit/GLKit.h>
 //#import <MessageUI/MFMailComposeViewController.h>
@@ -19,6 +20,9 @@
 
 #import "GraphicsRenderer.h"
 #include <vector>
+
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/features2d/features2d.hpp"
 
 struct Options
 {
@@ -243,6 +247,14 @@ struct Measurements {
     //    // Renders cubes on measured points
     //    STCubeRenderer *cubeRenderer;
     GraphicsRenderer *_graphicsRenderer;
+    
+    std::vector<cv::Vec4i> lineSeg; //For houghLinesP
+    
+    
+    uint16_t *_linearizeBuffer;
+    uint8_t *_coloredDepthBuffer;
+    //    uint8_t *_normalsBuffer;
+    uint8_t *_colorImageBuffer;
 
     
 }

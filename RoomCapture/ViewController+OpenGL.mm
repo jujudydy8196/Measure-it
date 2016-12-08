@@ -259,9 +259,16 @@ using namespace std;
                     CGContextFillPath(context);
                 }
                 if (sp1Valid && sp2Valid){
-                    cout << "TODO: YI draw line!" << endl;
+                    CGContextSetStrokeColorWithColor(context, [UIColor whiteColor].CGColor);
+                    //Set the width of the pen mark
+                    CGContextSetLineWidth(context, 1.0);
+                    
+                    // Draw a line
+                    //Start at this point
+                    CGContextMoveToPoint(context, sp1.x, sp1.y);
+                    CGContextAddLineToPoint(context, sp2.x, sp2.y);
+                    CGContextStrokePath(context);
                 }
-                
                 
             }
             self.measureView.image = UIGraphicsGetImageFromCurrentImageContext();
@@ -286,10 +293,10 @@ using namespace std;
                     CGContextFillEllipseInRect(context, selectedRect);
                     CGContextFillPath(context);
                 }
-                cout << "renderSceneWithDepthFrame Draw point" << endl;
-                cout << "pt1 valid: " << sp1Valid << endl;
-                cout << "pt1 3d coord: " << _measure.pt1.v[0] << "," << _measure.pt1.v[1] << "," << _measure.pt1.v[2] << endl;
-                cout << "pt1 coord: " << sp1.x << "," << sp1.y << endl;
+//                cout << "renderSceneWithDepthFrame Draw point" << endl;
+//                cout << "pt1 valid: " << sp1Valid << endl;
+//                cout << "pt1 3d coord: " << _measure.pt1.v[0] << "," << _measure.pt1.v[1] << "," << _measure.pt1.v[2] << endl;
+//                cout << "pt1 coord: " << sp1.x << "," << sp1.y << endl;
             }
             self.measureView.image = UIGraphicsGetImageFromCurrentImageContext();
             UIGraphicsEndImageContext();
@@ -381,15 +388,7 @@ using namespace std;
     GLKMatrix4 camPose = [_slamState.tracker lastFrameCameraPose];
     bool isInvertible = false;
     GLKMatrix4 worldToCam = GLKMatrix4Invert(camPose, &isInvertible);
-    cout << "3d pt:" << pt3d.v[0] << "," << pt3d.v[1] << "," << pt3d.v[2] << endl;
-//    cout << "camInWorld:" << camPose.m00 << "," << camPose.m01 << "," << camPose.m02 << "," << camPose.m03 << endl;
-//    cout << camPose.m10 << "," << camPose.m11 << "," << camPose.m12 << "," << camPose.m13 << endl;
-//    cout << camPose.m20 << "," << camPose.m21 << "," << camPose.m22 << "," << camPose.m23 << endl;
-//    cout << camPose.m30 << "," << camPose.m31 << "," << camPose.m32 << "," << camPose.m33 << endl;
-//    cout << "worldToCam:" << worldToCam.m00 << "," << worldToCam.m01 << "," << worldToCam.m02 << "," << worldToCam.m03 << endl;
-//    cout << worldToCam.m10 << "," << worldToCam.m11 << "," << worldToCam.m12 << "," << worldToCam.m13 << endl;
-//    cout << worldToCam.m20 << "," << worldToCam.m21 << "," << worldToCam.m22 << "," << worldToCam.m23 << endl;
-//    cout << worldToCam.m30 << "," << worldToCam.m31 << "," << worldToCam.m32 << "," << worldToCam.m33 << endl;
+//    cout << "3d pt:" << pt3d.v[0] << "," << pt3d.v[1] << "," << pt3d.v[2] << endl;
 
 
     if (isInvertible){

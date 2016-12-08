@@ -240,11 +240,9 @@ using namespace std;
                 
                 // Calculate distance
                 _measure.distance = GLKVector3Length(GLKVector3Subtract(_measure.pt2, _measure.pt1));
+                [self.distanceLabel setText:[NSString stringWithFormat:@"%f m", _measure.distance*0.001] ];
                 cout << "distance: " << _measure.distance << endl;
                 _measure.mstatus = Measurements::MeasureNoPoint;
-                
-                // TODO: Yi display distance
-                cout << "TODO: Yi display distance" << endl;
                 break;
                 
             default:{}
@@ -284,5 +282,7 @@ using namespace std;
     cout << "_fx:" << _fx << " _fy:" << _fy << " _cx:" << _cx << " _cy:" << _cy << endl;
     return ptInWorld;
 }
+
+//- (GLKVector3)screenPtsTo3DPtsByMesh: (GLKVector3)
 
 @end

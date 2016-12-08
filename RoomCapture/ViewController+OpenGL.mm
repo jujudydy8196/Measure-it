@@ -226,21 +226,57 @@ using namespace std;
         default: {}
     };
     
-    // TODO: YI render cubes for tracked points
+    // Render curPointScreen and square on screen
+    int centerSqSize = 5*3.2;
+    UIGraphicsBeginImageContextWithOptions(self.selectView.frame.size, false, 1.0f);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+    CGContextSetLineWidth(context, 2.0);
+    CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+    CGRect centerRect = CGRectMake(self.selectView.frame.size.width/2 - centerSqSize, self.selectView.frame.size.height/2 - centerSqSize, centerSqSize*2, centerSqSize*2);
+    CGContextStrokeRect(context, centerRect);
+    
+    CGContextFillRect(context, CGRectMake(_measure.curPointScreen.x,_measure.curPointScreen.y,2,2));
+    self.selectView.image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
+
+    
+    // Render circles on tracked points
+    int halfSquare = 15;
     switch (_measure.mstatus){
         case Measurements::MeasureNoPoint:{
+            break;
+        }
+        case Measurements::MeasureOnePoint:{
+            // If pt1 does not need to be updated, render point 1
+            UIGraphicsBeginImageContextWithOptions(self.measureView.frame.size, false, 1.0f);
+            CGPoint sp1 = [self point3dToScreen:_measure.pt1];
+            CGContextRef context = UIGraphicsGetCurrentContext();
+            CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
+            CGContextSetLineWidth(context, 2.0);
+            CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
+                
+            bool sp1Valid = [self isValidScreenPoint: sp1];
+            if (sp1Valid){
+                CGRect selectedRect = CGRectMake(sp1.x - halfSquare, sp1.y - halfSquare, halfSquare*2, halfSquare*2);
+                CGContextFillEllipseInRect(context, selectedRect);
+                CGContextFillPath(context);
+            }
+            
+            // TODO YI: render pt1 to curScreen point
+            cout << "TODO YI: render pt1 to curScreen point" << endl;
+            self.measureView.image = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+            break;
+        }
+        case Measurements::MeasureTwoPoints: {
             // Render both points and line from last measurement if distance is not NAN
             UIGraphicsBeginImageContextWithOptions(self.measureView.frame.size, false, 1.0f);
             if (_measure.distance != NAN){
-//                GLKMatrix4 currentModelView = GLKMatrix4Identity;
-//                GLKMatrix4 currentProjection = _display.colorCameraGLProjectionMatrix;
-//                _graphicsRenderer->renderLine(_measure.pt1, _measure.pt2, currentProjection, currentModelView, 1); //_circle1.frame.origin.x <_circle2.frame.origin.x)
-                
                 CGPoint sp1 = [self point3dToScreen:_measure.pt1];
                 CGPoint sp2 = [self point3dToScreen:_measure.pt2];
                 
-                int halfSquare = 15;
-                                CGContextRef context = UIGraphicsGetCurrentContext();
+                CGContextRef context = UIGraphicsGetCurrentContext();
                 CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
                 CGContextSetLineWidth(context, 2.0);
                 CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
@@ -273,34 +309,7 @@ using namespace std;
             }
             self.measureView.image = UIGraphicsGetImageFromCurrentImageContext();
             UIGraphicsEndImageContext();
-            break;
         }
-        case Measurements::MeasureOnePoint:
-        case Measurements::MeasureTwoPoints:
-            // If pt1 does not need to be updated, render point 1
-            UIGraphicsBeginImageContextWithOptions(self.measureView.frame.size, false, 1.0f);
-            if (!_measure.pt1NeedsConvert){
-                CGPoint sp1 = [self point3dToScreen:_measure.pt1];
-                int halfSquare = 15;
-                CGContextRef context = UIGraphicsGetCurrentContext();
-                CGContextSetRGBStrokeColor(context, 1.0, 1.0, 0.0, 1);
-                CGContextSetLineWidth(context, 2.0);
-                CGContextSetRGBFillColor(context, 1.0, 1.0, 0.0, 1);
-                
-                bool sp1Valid = [self isValidScreenPoint: sp1];
-                if (sp1Valid){
-                    CGRect selectedRect = CGRectMake(sp1.x - halfSquare, sp1.y - halfSquare, halfSquare*2, halfSquare*2);
-                    CGContextFillEllipseInRect(context, selectedRect);
-                    CGContextFillPath(context);
-                }
-//                cout << "renderSceneWithDepthFrame Draw point" << endl;
-//                cout << "pt1 valid: " << sp1Valid << endl;
-//                cout << "pt1 3d coord: " << _measure.pt1.v[0] << "," << _measure.pt1.v[1] << "," << _measure.pt1.v[2] << endl;
-//                cout << "pt1 coord: " << sp1.x << "," << sp1.y << endl;
-            }
-            self.measureView.image = UIGraphicsGetImageFromCurrentImageContext();
-            UIGraphicsEndImageContext();
-            break;
         default:{}
     }
     

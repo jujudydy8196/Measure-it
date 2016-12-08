@@ -217,37 +217,56 @@ using namespace std;
         // Scene rendering is triggered by new frames to avoid rendering the same view several times.
         [self renderSceneWithDepthFrame:depthFrame colorFrame:colorFrame];
         
-        switch (_measure.mstatus) {
-            case Measurements::MeasureNoPoint:
-                break;
-                
-            case Measurements::MeasureOnePoint:
-                if (_measure.pt1NeedsConvert){
-                    _measure.pt1 = [self screenPtsTo3DPts:_measure.pt1 fromDepth:depthFrame];
-                    _measure.pt1NeedsConvert = false;
-                }
-                break;
-                
-            case Measurements::MeasureTwoPoints:
-                if (_measure.pt1NeedsConvert){
-                    _measure.pt1 = [self screenPtsTo3DPts:_measure.pt1 fromDepth:depthFrame];
-                    _measure.pt1NeedsConvert = false;
-                }
-                if (_measure.pt2NeedsConvert){
-                    _measure.pt2 = [self screenPtsTo3DPts:_measure.pt2 fromDepth:depthFrame];
-                    _measure.pt2NeedsConvert = false;
-                }
-                
-                // Calculate distance
-                _measure.distance = GLKVector3Length(GLKVector3Subtract(_measure.pt2, _measure.pt1));
-                [self.distanceLabel setText:[NSString stringWithFormat:@"%f m", _measure.distance*0.001] ];
-                cout << "distance: " << _measure.distance << endl;
-                _measure.mstatus = Measurements::MeasureNoPoint;
-                break;
-                
-            default:{}
+        // update curPoint and curScreenPoint
+        [self updatePotentialPoint: depthFrame];
+//        switch (_measure.mstatus) {
+//            case Measurements::MeasureNoPoint:
+//                break;
+//                
+//            case Measurements::MeasureOnePoint:
+//                if (_measure.pt1NeedsConvert){
+//                    _measure.pt1 = [self screenPtsTo3DPts:_measure.pt1 fromDepth:depthFrame];
+//                    _measure.pt1NeedsConvert = false;
+//                }
+//                break;
+//                
+//            case Measurements::MeasureTwoPoints:
+//                if (_measure.pt1NeedsConvert){
+//                    _measure.pt1 = [self screenPtsTo3DPts:_measure.pt1 fromDepth:depthFrame];
+//                    _measure.pt1NeedsConvert = false;
+//                }
+//                if (_measure.pt2NeedsConvert){
+//                    _measure.pt2 = [self screenPtsTo3DPts:_measure.pt2 fromDepth:depthFrame];
+//                    _measure.pt2NeedsConvert = false;
+//                }
+//                
+//                // Calculate distance
+//                _measure.distance = GLKVector3Length(GLKVector3Subtract(_measure.pt2, _measure.pt1));
+//                [self.distanceLabel setText:[NSString stringWithFormat:@"%f m", _measure.distance*0.001] ];
+//                cout << "distance: " << _measure.distance << endl;
+//                _measure.mstatus = Measurements::MeasureNoPoint;
+//                break;
+//            default:{}
+//        }
+    }
+}
+
+- (void) updatePotentialPoint: (STDepthFrame*) depthFrame {
+    // check every depth in the center 11*11
+    float minDepth = NAN;
+    for (int ic = -5; ic <= 5; ic++){
+        for (int ir = -5; ir <= 5; ir++){
+            GLKVector3 spt = GLKVector3Make(self.view.frame.size.width/2+ic*3.2, self.view.frame.size.height/2+ir*3.2, NAN);
+            GLKVector3 pt3d = [self screenPtsTo3DPts:spt fromDepth:depthFrame];
+            cout << "ic:" << ic << " ir:" << ir << " pt3d v[2]:" << pt3d.v[2] << endl;
+            if (minDepth != minDepth || pt3d.v[2] < minDepth){
+                minDepth = pt3d.v[2];
+                _measure.curPoint = pt3d;
+                _measure.curPointScreen = CGPointMake(spt.v[0], spt.v[1]);
+            }
         }
     }
+    cout << "updatePotentialPoint minDepth:" << minDepth << " screenPt:(" << _measure.curPointScreen.x << ", " << _measure.curPointScreen.y << ")" <<  endl;
 }
 
 // Assume the following intrinsics, from the Structure SDK docs
@@ -272,15 +291,14 @@ using namespace std;
     float yc = depth * (r - _cy) / _fy;
     float zc = depth;
     
-    GLKVector3 ptInCam = GLKVector3Ma
-    ke(xc, yc, zc);
+    GLKVector3 ptInCam = GLKVector3Make(xc, yc, zc);
     GLKMatrix4 camPose = [_slamState.tracker lastFrameCameraPose];
     GLKVector3 ptInWorld = GLKMatrix4MultiplyVector3WithTranslation(camPose, ptInCam);
     
     
-    cout << "screen point (" << screenPt.v[0] << "," << screenPt.v[1] << ") to 3d point ("
-        << xc << "," << yc << "," << zc << ") at r:" << r << ",c:" << c << ",depth:" << depth << endl;
-    cout << "_fx:" << _fx << " _fy:" << _fy << " _cx:" << _cx << " _cy:" << _cy << endl;
+//    cout << "screen point (" << screenPt.v[0] << "," << screenPt.v[1] << ") to 3d point ("
+//        << xc << "," << yc << "," << zc << ") at r:" << r << ",c:" << c << ",depth:" << depth << endl;
+//    cout << "_fx:" << _fx << " _fy:" << _fy << " _cx:" << _cx << " _cy:" << _cy << endl;
     return ptInWorld;
 }
 

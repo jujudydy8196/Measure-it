@@ -690,30 +690,30 @@ using namespace std;
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    UITouch *touch = [touches anyObject];
-    CGPoint touchPoint = [touch locationInView:self.view];
-    NSTimeInterval timestamp = [touch timestamp];
-    
-    std::cout << "touches began " << touchPoint.x << ", " << touchPoint.y << std::endl;
+//    UITouch *touch = [touches anyObject];
+//    CGPoint touchPoint = [touch locationInView:self.view];
+//    NSTimeInterval timestamp = [touch timestamp];
+//    
+    std::cout << "touches began " << std::endl;// << touchPoint.x << ", " << touchPoint.y << std::endl;
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    UITouch *touch = [touches anyObject];
-    CGPoint touchPoint = [touch locationInView:self.view];
-    NSTimeInterval timestamp = [touch timestamp];
+//    UITouch *touch = [touches anyObject];
+//    CGPoint touchPoint = [touch locationInView:self.view];
+//    NSTimeInterval timestamp = [touch timestamp];
     
-    std::cout << "touches moved " << touchPoint.x << ", " << touchPoint.y << std::endl;
+    std::cout << "touches moved " << std::endl;//touchPoint.x << ", " << touchPoint.y << std::endl;
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    UITouch *touch = [touches anyObject];
-    CGPoint touchPoint = [touch locationInView:self.view];
-    NSTimeInterval timestamp = [touch timestamp];
+//    UITouch *touch = [touches anyObject];
+//    CGPoint touchPoint = [touch locationInView:self.view];
+//    NSTimeInterval timestamp = [touch timestamp];
     
-    std::cout << "touches ends " << touchPoint.x << ", " << touchPoint.y << std::endl;
-    [self updateMeasurement:touchPoint];
+    std::cout << "touches ends " << std::endl;//touchPoint.x << ", " << touchPoint.y << std::endl;
+    [self updateMeasurement];
     
 }
 
@@ -721,7 +721,45 @@ using namespace std;
 {
 }
 
-- (void)updateMeasurement:(CGPoint)screenPoint{
+//- (void)updateMeasurement:(CGPoint)screenPoint{
+//    cout << "measure status: " << _measure.mstatus << endl;
+//    
+//    switch (_measure.mstatus)
+//    {
+//        case Measurements::MeasureNoPoint:
+//            // Reset tracked points;
+//            _measure.distance = NAN;
+//            _measure.pt2 = GLKVector3Make(NAN, NAN, NAN);
+//            _measure.pt2NeedsConvert = false;
+//            
+//            // Record the first point and Calculate 3D point on next depth frame
+//            _measure.pt1 = GLKVector3Make(screenPoint.x, screenPoint.y, NAN);
+//            _measure.pt1NeedsConvert = true;
+//            
+//            _measure.mstatus = Measurements::MeasureOnePoint;
+//            cout << "selected one point (" << _measure.pt1.v[0] << "," << _measure.pt1.v[1] << ")" << endl;
+//            break;
+//            
+//        case Measurements::MeasureOnePoint:
+//            // Record the second point
+//            // Calculate 3D point on next depth frame
+//            _measure.pt2 = GLKVector3Make(screenPoint.x, screenPoint.y, NAN);
+//            _measure.pt2NeedsConvert = true;
+//            _measure.mstatus = Measurements::MeasureTwoPoints;
+//            cout << "selected two points (" << _measure.pt2.v[0] << "," << _measure.pt2.v[1] << ")" << endl;
+//
+//            break;
+//            
+//        case Measurements::MeasureTwoPoints:
+//            // Waiting for next depth frame to calculate distance and move to MeasureNoPoint
+//            cout << "waiting for depth frame" << endl;
+//            break;
+//        default: {}
+//    }
+//
+//}
+
+- (void)updateMeasurement {
     cout << "measure status: " << _measure.mstatus << endl;
     
     switch (_measure.mstatus)
@@ -730,11 +768,9 @@ using namespace std;
             // Reset tracked points;
             _measure.distance = NAN;
             _measure.pt2 = GLKVector3Make(NAN, NAN, NAN);
-            _measure.pt2NeedsConvert = false;
             
             // Record the first point and Calculate 3D point on next depth frame
-            _measure.pt1 = GLKVector3Make(screenPoint.x, screenPoint.y, NAN);
-            _measure.pt1NeedsConvert = true;
+            _measure.pt1 = _measure.curPoint;
             
             _measure.mstatus = Measurements::MeasureOnePoint;
             cout << "selected one point (" << _measure.pt1.v[0] << "," << _measure.pt1.v[1] << ")" << endl;
@@ -743,20 +779,22 @@ using namespace std;
         case Measurements::MeasureOnePoint:
             // Record the second point
             // Calculate 3D point on next depth frame
-            _measure.pt2 = GLKVector3Make(screenPoint.x, screenPoint.y, NAN);
-            _measure.pt2NeedsConvert = true;
+            _measure.pt2 = _measure.curPoint;
             _measure.mstatus = Measurements::MeasureTwoPoints;
             cout << "selected two points (" << _measure.pt2.v[0] << "," << _measure.pt2.v[1] << ")" << endl;
-
+            
             break;
             
         case Measurements::MeasureTwoPoints:
-            // Waiting for next depth frame to calculate distance and move to MeasureNoPoint
-            cout << "waiting for depth frame" << endl;
+            _measure.distance = GLKVector3Length(GLKVector3Subtract(_measure.pt2, _measure.pt1));
+            [self.distanceLabel setText:[NSString stringWithFormat:@"%f m", _measure.distance*0.001] ];
+            cout << "distance: " << _measure.distance << endl;
+
+            _measure.mstatus = Measurements::MeasureNoPoint;
             break;
         default: {}
     }
-
+    
 }
 
 @end

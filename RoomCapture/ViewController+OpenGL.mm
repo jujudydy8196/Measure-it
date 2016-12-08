@@ -291,7 +291,12 @@ const uint16_t maxShiftValue = 2048;
                                         NULL,                        //decode
                                         false,                       //pixel interpolation
                                         kCGRenderingIntentDefault);  //rendering intent
-    [self findInterestEdgesSeg:[UIImage imageWithCGImage:imageRef]];
+    UIImage* edgeSegView = [self findInterestEdgesSeg:[UIImage imageWithCGImage:imageRef]];
+//    UIGraphicsBeginImageContext(self.measureView.frame.size);
+//    [edgeSegView drawInRect:CGRectMake(0, 0, self.measureView.frame.size.width, self.measureView.frame.size.height)];
+//    self.measureView.image = edgeSegView;
+    
+    
     // Activate our view framebuffer.
     [(EAGLView *)self.view setFramebuffer];
     
@@ -528,7 +533,7 @@ const uint16_t maxShiftValue = 2048;
     
     cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
     cv::Mat dst, cdst;
-    cv::Canny(cvImage, dst, 20, 200, 3);
+    cv::Canny(cvImage, dst, 50, 200, 3);
     
     //    cv::cvtColor(dst, cdst, CV_GRAY2BGR);
     cv::HoughLinesP(dst, lineSeg, 1, CV_PI/180, 75, 10, 10 );

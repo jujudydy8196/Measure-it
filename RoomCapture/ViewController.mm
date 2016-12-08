@@ -706,6 +706,7 @@ namespace  {
     UIGraphicsBeginImageContextWithOptions(self.measureView.frame.size, false, 1.0f);
     CGContextRef context = UIGraphicsGetCurrentContext();
     
+    
     if (lineIdx != -1) {
         CGContextSetLineWidth(context,3.0f);
         /* Start the line at this point */
@@ -729,6 +730,24 @@ namespace  {
     NSTimeInterval timestamp = [touch timestamp];
     
     std::cout << "touches moved " << touchPoint.x << ", " << touchPoint.y << std::endl;
+    int lineIdx  = [self findNearEdge:touchPoint within: NEIGHBOUR_THRES];
+    
+    UIGraphicsBeginImageContextWithOptions(self.measureView.frame.size, false, 1.0f);
+    CGContextRef context = UIGraphicsGetCurrentContext();
+    
+    if (lineIdx != -1) {
+        CGContextSetLineWidth(context,3.0f);
+        /* Start the line at this point */
+        std::cout << "line idx: " << lineIdx << std::endl;
+        CGContextMoveToPoint(context,lineSeg[lineIdx][0]*3.2, lineSeg[lineIdx][1]*3.2);
+        /* And end it at this point */
+        CGContextAddLineToPoint(context,lineSeg[lineIdx][2]*3.2, lineSeg[lineIdx][3]*3.2);
+        /* Use the context's current color to draw the line */
+        CGContextSetRGBStrokeColor(context, 0, 1.0, 1.0, 2);
+        CGContextStrokePath(context);
+    }
+    self.measureView.image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -738,6 +757,12 @@ namespace  {
     NSTimeInterval timestamp = [touch timestamp];
     
     std::cout << "touches ends " << touchPoint.x << ", " << touchPoint.y << std::endl;
+    std::cout << "before snap: (" << touchPoint.x << "," << touchPoint.y << ")" << std::endl;
+    CGPoint snapPoint = [self findInterstPointNearEdge:touchPoint within: NEIGHBOUR_THRES];
+    if (!CGPointEqualToPoint(touchPoint,snapPoint)) {
+        std::cout << "after snap: (" << snapPoint.x << "," << snapPoint.y << ")" << std::endl;
+        touchPoint = snapPoint;
+    }
     [self updateMeasurement:touchPoint];
     
 }
@@ -816,5 +841,54 @@ namespace  {
     
     return ABS((P.x * (A.y - B.y) + P.y * (B.x - A.x) + (A.x * B.y - B.x * A.y)) / sqrt(pow(B.x - A.x, 2) + pow(B.y - A.y, 2)));
 }
+
+- (CGPoint) findInterstPointNearEdge: (CGPoint)selectedPoint within: (int)nearThresh{
+    // nearThresh defines the size of neighborhood to search for an interest point
+    
+    //     TODO Judy: find point snap to edge within circle (thres)
+    //    std::cout << "number of lines detected: "  << lineSeg.size() << std::endl;
+    std::cout << "point need to snap " << selectedPoint.x << " " << selectedPoint.y << std::endl;
+    CGFloat minDist = CGFLOAT_MAX;
+    int minIdx=-1;
+    for (int i=1; i<lineSeg.size(); i++) {
+        CGPoint a = CGPointMake(lineSeg[i][0]*3.2, lineSeg[i][1]*3.2);
+        CGPoint b = CGPointMake(lineSeg[i][2]*3.2, lineSeg[i][3]*3.2);
+        std::cout << "from : (" << a.x << "," << a.y << ") to (" << b.x << "," << b.y << ")" << std::endl;
+        
+        //        CGFloat dist = [distanceToLine]
+        CGFloat dist = [self distanceToLineSeg:selectedPoint toLineWithPointA:a andPointB:b ] ;
+        std::cout << "dist to line " << i << " : " << dist << std::endl;
+        if (minDist>dist) {
+            minDist=dist;
+            minIdx=i;
+        }
+    }
+    std::cout << "check threshold : " << minDist << std::endl;
+    if (minIdx==-1 || minDist>nearThresh)
+        return selectedPoint;
+    
+    cv::Point2f pt1 (lineSeg[minIdx][0]*3.2, lineSeg[minIdx][1]*3.2);
+    cv::Point2f pt2 (lineSeg[minIdx][2]*3.2, lineSeg[minIdx][3]*3.2);
+    cv::Point2f p (selectedPoint.x, selectedPoint.y);
+    cv::Point2f a = p-pt1, b = pt2-pt1;
+    
+    //    cv::Point2f a(2.0,2.8);
+    //    cv::Point2f b(3.3,2.7);
+    std::cout << "vec A: " << a << " vec B: " << b << " dot: " << a.ddot(b) << " norm a: " << cv::norm(a) << std::endl;
+    float cos = a.ddot(b) / (cv::norm(a)*cv::norm(b));
+    float bprimeLen = cv::norm(a) * cos;
+    float scale = bprimeLen / cv::norm(b);
+    b *= scale;
+    CGPoint nearestpt = CGPointMake(pt1.x+b.x, pt1.y+b.y);
+    
+    //    return (minDist<nearThresh) ? minIdx : -1;
+    return nearestpt;
+    //    cv::Mat cvImage = [self cvMatFromUIImage:depthImage];
+    //    cv::line( cvImage, cv::Point(lineSeg[i][0], lineSeg[i][1]),
+    //             cv::Point(lineSeg[i][2], lineSeg[i][3]), cv::Scalar(0,0,255), 3, 8 );
+    //    std::cout << minIdx << std::endl;
+    //    return minIdx;
+}
+
 
 @end
